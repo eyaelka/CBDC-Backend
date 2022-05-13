@@ -1,0 +1,7 @@
+include 'workflows'
+include 'contracts'
+include 'centralBankBackend'
+include 'endUserBackend'
+include 'clients'
+include 'commercialbank-backend'
+include 'merchant-backend'
