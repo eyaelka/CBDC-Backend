@@ -43,6 +43,7 @@ public class CommercialBankController {
 
     @PostMapping("/commercialbank/update")
     public AccountIdAndPassword update(@RequestBody CommercialBankUpdateModel commercialBankUpdateModel){
+        System.out.println(commercialBankUpdateModel);
         return commercialBankInterface.update(
                 commercialBankUpdateModel.getCommercialBankData(),commercialBankUpdateModel.getCommercialBankAccountId());
     }

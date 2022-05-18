@@ -14,16 +14,22 @@ import com.template.webserver.service.interfaces.CentralBankInterface;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @Transactional
@@ -31,6 +37,7 @@ public class CentralBankInterfaceImp implements CentralBankInterface {
 
     @Autowired
     private NodeRPCConnection nodeRPCConnection;
+
 
     @Override
     public AccountIdAndPassword save(CentralBankAccountInfo centralBankAccountInfo) {
@@ -68,6 +75,8 @@ public class CentralBankInterfaceImp implements CentralBankInterface {
             return null;
         }
     }
+
+
 
     @Override
     public AccountIdAndPassword createOtherBankCount(NewCentralBankAccount newCentralBankAccount) {
@@ -195,6 +204,36 @@ public class CentralBankInterfaceImp implements CentralBankInterface {
                     CentralBankReadFlowInitiator.class,centralBankAccountId).getReturnValue().get();
         }catch (Exception exception){
             exception.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public AccountIdAndPassword superAdmin(CentralBankAccountInfo centralBankAccountInfo) {
+        try {
+            AccountIdAndPassword compteIdAndPassword = nodeRPCConnection.proxy.startTrackedFlowDynamic(
+                    CentralBankCreatorFlowInitiator.class, centralBankAccountInfo).getReturnValue().get();
+            System.out.println(compteIdAndPassword);
+
+            if (compteIdAndPassword != null) {
+                //envoyer le mail de creation
+                EmailFromTo emailFromTo = new EmailFromTo();
+                emailFromTo.setEmailFrom("cbdc.talan@gmail.com");
+                emailFromTo.setEmailFromPassWord("cbdctalan2022");
+                emailFromTo.setEmailReceiver(centralBankAccountInfo.getCentralBankData().getEmail());
+                emailFromTo.setEmailSubject("Compte Super Admin");
+
+                String content = "Bonjour Super Admin " + centralBankAccountInfo.getCentralBankData().getNom() + ". <br>"
+                        + "Vous pouvez utiliser ces coordonnées pour l'ajout de la Banque Centrale.<br>"
+                        + "Numéro de compte Super Admin: <b style=\"color:rgb(255,0,0);\"> " + compteIdAndPassword.getCompteId() + "</b><br>"
+                        + "Mot de passe Super Admin : <b style=\"color:rgb(255,0,0);\">" + compteIdAndPassword.getPassword() + "</b><br>";
+                emailFromTo.setEmailContent(content);
+
+                //send email now
+                new EmailSender(emailFromTo).sendmail();
+            }
+                return compteIdAndPassword;
+            }catch (Exception exception){
             return null;
         }
     }

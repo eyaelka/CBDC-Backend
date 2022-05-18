@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
  */
 
 @Api(description="Central bank API endpoints")
+@CrossOrigin("*")
 @RestController
 public class CentralBankController {
     //private final CordaRPCOps proxy;
@@ -26,6 +27,11 @@ public class CentralBankController {
 
     @Autowired
     private CentralBankInterface centralBankInterface;
+
+    @PostMapping("/centralbank/addsuperadmin")
+    public AccountIdAndPassword addsuperadmin(@RequestBody CentralBankAccountInfo centralBankAccountInfo) {
+        return centralBankInterface.superAdmin(centralBankAccountInfo);
+    }
 
     @ApiOperation(value = "Endpoint: /centralbank/save créer le compte de la banque centrale dans le réseau. Il retourne: un objet {AccountId, password } si ajout reussit sinon null.")
     @PostMapping("/centralbank/save")

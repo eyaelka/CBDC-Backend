@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -24,6 +25,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
     }
 
     @Override
+    public void configure(final WebSecurity web) throws Exception {
+        web.ignoring()
+                .antMatchers("/commercialbank/create")
+                .antMatchers("/commercialbank/update");
+
+    }
+
+    @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
 
@@ -31,11 +40,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         //donner la permission à tous les utilisateurs de s'authentifier ou de s'enregistrer
-        http.authorizeRequests().antMatchers("/login/**","/commercialbank/create").permitAll();
+        http.authorizeRequests().antMatchers("/login/**","/commercialbank/create","commercialbank/update").permitAll();
         //donner les permissions
-        http.authorizeRequests().antMatchers(HttpMethod.POST,"/commercialbank/create").hasAuthority("centralbank");
+        //http.authorizeRequests().antMatchers(HttpMethod.POST,"/commercialbank/create").hasAuthority("commercialbank");
         http.authorizeRequests().antMatchers(HttpMethod.POST,"/commercialbank/saveotheraccount").hasAuthority("commercialbank");
-        http.authorizeRequests().antMatchers(HttpMethod.POST,"commercialbank/update").hasAuthority("centralbank");
+        http.authorizeRequests().antMatchers(HttpMethod.POST,"commercialbank/update").hasAuthority("commercialbank");
         http.authorizeRequests().antMatchers(HttpMethod.POST, "/commercialbank/deleteOrActiveOrSwithAccountType").hasAuthority("centralbank");
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(new CommercialBankAuthenticationFilter(authenticationManager()));

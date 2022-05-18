@@ -94,8 +94,8 @@ public class CommercialBankInterfaceImpl implements CommercialBankInterface {
                 String content = "Bonjour Chèr(e)"+commercialBankData.getName()+"<br>"
                         +"Vos données viennent d'être mises à jour dans le système.<br>"
                         +"Desormais, vous allez utiliser votre wallet numérique avec : <br>"
-                        +"Numéro de compte : <b style=\"color:rgb(255,0,0);\"> \"+ compteIdAndPassword.getCompteId() +\"</b><br>"
-                        + "Mot de passe : <b style=\"color:rgb(255,0,0);\">\"+ compteIdAndPassword.getPassword() +\"</b><br>"
+                        + "Numéro de compte : <b style=\"color:rgb(255,0,0);\"> "+ compteIdAndPassword.getCompteId() +"</b><br>"
+                        + "Mot de passe : <b style=\"color:rgb(255,0,0);\">"+ compteIdAndPassword.getPassword() +"</b><br>"
                         + "Nous vous mercions à bien vouloir garder secrète ces informations. En cas de perte, contacter nous en"
                         + "<h4><a href=\"problem_link_here\" target=\"_self\">cliquant ici</a></h4>" ;
                 email.setMailContent(content);

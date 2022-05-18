@@ -75,6 +75,7 @@ public class CentralBankCreatorFlowInitiator extends FlowLogic<AccountIdAndPassw
             centralBankAccount.setAccountId(accountIdAndPassword.getCompteId());
             centralBankAccount.setPassword(accountIdAndPassword.getPassword());
             centralBank.getCentralBankAccount().add(centralBankAccount);
+
            CentralBankState centralBankState2 = new CentralBankState(centralBank, owner, new UniqueIdentifier());
 
             final Command<CentralBankContract.Create> txCommand = new Command<>(new CentralBankContract.Create(), Arrays.asList(owner.getOwningKey()));

@@ -73,13 +73,13 @@ public class CommercialBankCreatorFlowInitiator extends FlowLogic<AccountIdAndPa
                 return null;
             //Central Bank who will add the commercial bank
             Party addedBy = getOurIdentity();
-            System.out.println(addedBy);
             //The Merchant
-            Party owner = getServiceHub().getNetworkMapCache().getPeerByLegalName(new CordaX500Name("PartyB","New York","US"));
+            Party owner = getServiceHub().getNetworkMapCache().getPeerByLegalName(new CordaX500Name("PartyA","London","GB"));
             //Retrieve the notary identity from the network map
             Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
 
             CommercialBank commercialBank = new CommercialBank();
+
             commercialBank.setCommercialBankData(commercialBankAccountInfo.getCommercialBankData());
             CommercialBankAccount commercialBankAccount = new CommercialBankAccount();
             commercialBankAccount.setAccountType(commercialBankAccountInfo.getAccountType());
@@ -87,6 +87,7 @@ public class CommercialBankCreatorFlowInitiator extends FlowLogic<AccountIdAndPa
             commercialBankAccount.setAccountId(accountIdAndPassword.getCompteId());
             commercialBankAccount.setPassword(accountIdAndPassword.getPassword());
             commercialBank.getCommercialBankAccounts().add(commercialBankAccount);
+            System.out.println(commercialBank);
 
             CommercialBankState commercialBankState1 = new CommercialBankState(commercialBank,addedBy,owner, new UniqueIdentifier());
             final Command<CommercialBankContract.Create> txCommand = new Command<>(new CommercialBankContract.Create(),
@@ -105,6 +106,7 @@ public class CommercialBankCreatorFlowInitiator extends FlowLogic<AccountIdAndPa
             SignedTransaction fullySignedTx = subFlow(new CollectSignaturesFlow(signedTx, Arrays.asList(otherPartySession),CollectSignaturesFlow.tracker()));
             // finaliser la transaction
             subFlow(new FinalityFlow(fullySignedTx, Arrays.asList(otherPartySession))).getId().toString();
+            System.out.println(accountIdAndPassword);
             return accountIdAndPassword;
         }
         String accountId =  commercialBankState.getCommercialBank().getCommercialBankAccounts().get(
@@ -122,6 +124,7 @@ public class CommercialBankCreatorFlowInitiator extends FlowLogic<AccountIdAndPa
 
         int index;
         while ((index = containsAccountIdOrPassword(accountIdAndPassword)) ==1){
+            System.out.println(index);
             accountIdAndPassword = new AccountIdAndPasswordGenerator("cb").generateAccountIdAdnPassword();
         }
         if (index == -1)
