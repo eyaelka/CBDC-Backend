@@ -4,6 +4,10 @@ import com.template.flows.model.AccountIdAndPassword;
 import com.template.flows.model.CentralBankAccountInfo;
 import com.template.flows.model.NewCentralBankAccount;
 import com.template.model.centralBank.CentralBankData;
+import com.template.model.politiquesMonetaires.RegulateurDevise;
+import com.template.model.politiquesMonetaires.RegulateurMasseMonnetaire;
+import com.template.model.politiquesMonetaires.RegulateurTransactionInterPays;
+import com.template.model.politiquesMonetaires.RegulateurTransactionLocale;
 import com.template.webserver.model.CentralBankUpdateModel;
 import com.template.webserver.model.SuspendOrActiveOrSwithAccountTypeModel;
 import com.template.webserver.service.interfaces.CentralBankInterface;
@@ -63,10 +67,45 @@ public class CentralBankController {
     public CentralBankData getCentralBank(@RequestBody String centralBankAccountId) {
         return centralBankInterface.read(centralBankAccountId);
     }
-//    @PostMapping("/centralbank/login")
-//    public String getToken(@RequestBody AccountIdAndPassword accountIdAndPassword) {
-//        return centralBankInterface.getToken(accountIdAndPassword);
-//    }
 
 
+    @PostMapping("/politique/createmassemonnetaire")
+    public RegulateurMasseMonnetaire defineMasseMonnetaireRegulation(@RequestBody RegulateurMasseMonnetaire regulateurMasseMonnetaire){
+        return centralBankInterface.defineMasseMonnetaireRegulation(regulateurMasseMonnetaire);
+    }
+
+    @GetMapping("/politique/regulationmassemonnetaire/{pays}")
+    public RegulateurMasseMonnetaire getLastRegulationMasseMonnetaire(@PathVariable String pays){
+        return centralBankInterface.getLastRegulationMasseMonnetaire(pays);
+    }
+
+    @PostMapping("/politique/createdeviseregulation")
+    public RegulateurDevise defineDeviseRegulation(@RequestBody RegulateurDevise regulateurDevise){
+        return  centralBankInterface.defineDeviseRegulation(regulateurDevise);
+    }
+
+    @GetMapping("/politique/regulationdevise/{pays}")
+    public RegulateurDevise getLastRegulattionDevise(@PathVariable String pays){
+        return centralBankInterface.getLastRegulattionDevise(pays);
+    }
+
+    @PostMapping("/politique/createtxregulationinterpays")
+    public RegulateurTransactionInterPays defineTransactionInterPaysRegulation(@RequestBody RegulateurTransactionInterPays regulateurTransactionInterPays){
+        return centralBankInterface.defineTransactionInterPaysRegulation(regulateurTransactionInterPays);
+    }
+
+    @GetMapping("/politique/txregulationinterpays/{pays}")
+    public RegulateurMasseMonnetaire getLastRegulationTransactionInterPays(@PathVariable String pays){
+        return centralBankInterface.getLastRegulationTransactionInterPays(pays);
+    }
+
+    @PostMapping("/politique/createtxregulationlocal")
+    public RegulateurTransactionLocale defineTransactionLocaleRegulation(@RequestBody RegulateurTransactionLocale regulateurTransactionLocale){
+        return centralBankInterface.defineTransactionLocaleRegulation(regulateurTransactionLocale);
+    }
+
+    @GetMapping("/politique/txregulationlocal/{pays}")
+    public RegulateurTransactionLocale getLastRegulationTransactionLocaleString(@PathVariable String pays){
+        return centralBankInterface.getLastRegulationTransactionLocaleString(pays);
+    }
 }

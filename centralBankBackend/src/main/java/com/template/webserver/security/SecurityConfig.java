@@ -27,10 +27,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
     public void configure(final WebSecurity web) throws Exception {
         web.ignoring()
                 .antMatchers("/centralbank/save")
-                .antMatchers("/login/**");
-        ;
-
-
+                .antMatchers("/politique/createmassemonnetaire")
+                ;
     }
 
     @Override
@@ -41,9 +39,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         //donner la permission à tous les utilisateurs de s'authentifier ou de s'enregistrer
-        http.authorizeRequests().antMatchers(HttpMethod.POST,"/login/**").permitAll();
+        http.authorizeRequests().antMatchers(HttpMethod.POST,"/login/**","/politique/regulationmassemonnetaire/**","/politique/createdeviseregulation/**").permitAll();
+        http.authorizeRequests().antMatchers(HttpMethod.GET,"/politique/regulationmassemonnetaire/**","/politique/regulationdevise/**").permitAll();
         //donner les permissions
-        //http.authorizeRequests().antMatchers(HttpMethod.POST,"/centralbank/save").hasAuthority("cbdcadmin");
+        http.authorizeRequests().antMatchers(HttpMethod.POST,"/centralbank/save").hasAuthority("cbdcadmin");
         http.authorizeRequests().antMatchers(HttpMethod.POST,"/centralbank/saveotheraccount").hasAuthority("centralbank");
         http.authorizeRequests().antMatchers(HttpMethod.POST,"/centralbank/update").hasAuthority("centralbank");
         http.authorizeRequests().antMatchers(HttpMethod.POST, "/centralbank/deleteOrActiveOrSwithAccountType").hasAuthority("centralbank");

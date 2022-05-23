@@ -1,0 +1,65 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <changeSet author="talan" id="central_bank">
+        <createTable tableName="central_bank">
+            <column name="output_index" type="INT"/>
+            <column name="transaction_id" type="NVARCHAR(64)"/>
+            <column name="nom" type="NVARCHAR(64)"/>
+            <column name="pays" type="NVARCHAR(64)"/>
+            <column name="adresse" type="NVARCHAR(64)"/>
+            <column name="loicreation" type="NVARCHAR(64)"/>
+            <column name="email" type="NVARCHAR(64)"/>
+            <column name="sender" type="NVARCHAR(64)"/>
+            <column name="linearid" type="NVARCHAR(64)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="talan" id="commercial_bank">
+        <createTable tableName="commercial_bank">
+            <column name="output_index" type="INT"/>
+            <column name="transaction_id" type="NVARCHAR(64)"/>
+            <column name="name" type="NVARCHAR(64)"/>
+            <column name="pays" type="NVARCHAR(64)"/>
+            <column name="address" type="NVARCHAR(64)"/>
+            <column name="abreviation" type="NVARCHAR(64)"/>
+            <column name="fax" type="NVARCHAR(64)"/>
+            <column name="email" type="NVARCHAR(64)"/>
+            <column name="added_by" type="NVARCHAR(64)"/>
+            <column name="owner" type="NVARCHAR(64)"/>
+            <column name="linearid" type="NVARCHAR(64)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="talan" id="end_user">
+        <createTable tableName="end_user">
+            <column name="output_index" type="INT"/>
+            <column name="transaction_id" type="NVARCHAR(64)"/>
+            <column name="cin" type="NVARCHAR(64)"/>
+            <column name="nom" type="NVARCHAR(64)"/>
+            <column name="nationalite" type="NVARCHAR(64)"/>
+            <column name="adresse" type="NVARCHAR(64)"/>
+            <column name="telephone" type="NVARCHAR(64)"/>
+            <column name="date_naissance" type="date"/>
+            <column name="email" type="NVARCHAR(64)"/>
+            <column name="bank_who_add_user" type="NVARCHAR(64)"/>
+            <column name="added_by" type="NVARCHAR(64)"/>
+            <column name="owner" type="NVARCHAR(64)"/>
+            <column name="linearid" type="NVARCHAR(64)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="talan" id="merchant">
+        <createTable tableName="merchant">
+            <column name="output_index" type="INT"/>
+            <column name="transaction_id" type="NVARCHAR(64)"/>
+            <column name="agreement" type="NVARCHAR(64)"/>
+            <column name="business_name" type="NVARCHAR(64)"/>
+            <column name="business_type" type="NVARCHAR(64)"/>
+            <column name="email" type="NVARCHAR(64)"/>
+            <column name="address" type="NVARCHAR(64)"/>
+            <column name="added_by" type="NVARCHAR(64)"/>
+            <column name="owner" type="NVARCHAR(64)"/>
+            <column name="linearid" type="NVARCHAR(64)"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

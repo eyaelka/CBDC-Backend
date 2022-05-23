@@ -31,11 +31,9 @@ public class CentralBankAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         //preparer les entête à autoriser
-        response.addHeader("Access-Control-Allow-Origin", "*");
-        response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-        response.addHeader("Access-Control-Allow-Headers",
-                "Origin, Accept, X-Requested-With, Content-Type, "
-                        + "Access-Control-Request-Method, Access-Control-Request-Headers,Authorization");
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+        response.setHeader("Access-Control-Allow-Headers", "*");
         response.addHeader("Access-Control-Expose-Headers",
                 "Access-Control-Allow-Origin, Access-Control-Allow-Credentials, Authorization");
         //Ne rien faire si la methode http est options

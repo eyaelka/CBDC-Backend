@@ -4,7 +4,12 @@ import com.template.flows.centralBankFlows.*;
 import com.template.flows.model.AccountIdAndPassword;
 import com.template.flows.model.CentralBankAccountInfo;
 import com.template.flows.model.NewCentralBankAccount;
+import com.template.flows.politiquesMonetairesFlows.*;
 import com.template.model.centralBank.CentralBankData;
+import com.template.model.politiquesMonetaires.RegulateurDevise;
+import com.template.model.politiquesMonetaires.RegulateurMasseMonnetaire;
+import com.template.model.politiquesMonetaires.RegulateurTransactionInterPays;
+import com.template.model.politiquesMonetaires.RegulateurTransactionLocale;
 import com.template.webserver.NodeRPCConnection;
 import com.template.webserver.emailSender.EmailFromTo;
 import com.template.webserver.emailSender.EmailSender;
@@ -212,7 +217,7 @@ public class CentralBankInterfaceImp implements CentralBankInterface {
     public AccountIdAndPassword superAdmin(CentralBankAccountInfo centralBankAccountInfo) {
         try {
             AccountIdAndPassword compteIdAndPassword = nodeRPCConnection.proxy.startTrackedFlowDynamic(
-                    CentralBankCreatorFlowInitiator.class, centralBankAccountInfo).getReturnValue().get();
+                    CentralBankCreateSuperAdminFlowInitiator.class, centralBankAccountInfo).getReturnValue().get();
             System.out.println(compteIdAndPassword);
 
             if (compteIdAndPassword != null) {
@@ -236,6 +241,111 @@ public class CentralBankInterfaceImp implements CentralBankInterface {
             }catch (Exception exception){
             return null;
         }
+    }
+
+    @Override
+    public RegulateurMasseMonnetaire defineMasseMonnetaireRegulation(RegulateurMasseMonnetaire regulateurMasseMonnetaire) {
+        System.out.println(regulateurMasseMonnetaire);
+        try {
+            RegulateurMasseMonnetaire regulateurMasseMonnetaire1 = nodeRPCConnection.proxy.startTrackedFlowDynamic(
+                    RegulateurMasseMonnetaireCreatorFlowInitiator.class, regulateurMasseMonnetaire).getReturnValue().get();
+            System.out.println(regulateurMasseMonnetaire1);
+            return regulateurMasseMonnetaire1;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public RegulateurMasseMonnetaire getLastRegulationMasseMonnetaire(String pays) {
+        try{
+            RegulateurMasseMonnetaire regulateurMasseMonnetaire = nodeRPCConnection.proxy.startTrackedFlowDynamic(
+                    RegulateurMasseMonnetaireReadFlowInitiator.class, pays).getReturnValue().get();
+            return regulateurMasseMonnetaire;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    public RegulateurDevise defineDeviseRegulation(RegulateurDevise regulateurDevise) {
+        try{
+            RegulateurDevise regulateurDevise1 = nodeRPCConnection.proxy.startTrackedFlowDynamic(
+                    RegulateurDeviseCreatorFlowInitiator.class, regulateurDevise).getReturnValue().get();
+            return regulateurDevise1;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    public RegulateurDevise getLastRegulattionDevise(String pays) {
+        try{
+            RegulateurDevise regulateurDevise = nodeRPCConnection.proxy.startTrackedFlowDynamic(
+                    RegulateurDeviseReadFlowInitiator.class, pays).getReturnValue().get();
+            System.out.println(regulateurDevise);
+            return regulateurDevise;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    public RegulateurTransactionInterPays defineTransactionInterPaysRegulation(RegulateurTransactionInterPays regulateurTransactionInterPays) {
+        try{RegulateurTransactionInterPays regulateurTransactionInterPays1 = nodeRPCConnection.proxy.startTrackedFlowDynamic(
+                RegulateurTransactionInterPaysCreatorFlowInitiator.class, regulateurTransactionInterPays).getReturnValue().get();
+            System.out.println(regulateurTransactionInterPays1);
+            return regulateurTransactionInterPays1;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    public RegulateurMasseMonnetaire getLastRegulationTransactionInterPays(String pays) {
+        try{
+            RegulateurMasseMonnetaire regulateurMasseMonnetaire = nodeRPCConnection.proxy.startTrackedFlowDynamic(
+                    RegulateurMasseMonnetaireReadFlowInitiator.class, pays).getReturnValue().get();
+            System.out.println(regulateurMasseMonnetaire);
+            return regulateurMasseMonnetaire;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public RegulateurTransactionLocale defineTransactionLocaleRegulation(RegulateurTransactionLocale regulateurTransactionLocale) {
+        try{
+            RegulateurTransactionLocale regulateurTransactionLocale1 = nodeRPCConnection.proxy.startTrackedFlowDynamic(
+                    RegulateurTransactionLocaleCreatorFlowInitiator.class, regulateurTransactionLocale).getReturnValue().get();
+            System.out.println(regulateurTransactionLocale1);
+            return regulateurTransactionLocale1;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public RegulateurTransactionLocale getLastRegulationTransactionLocaleString(String pays) {
+        try{
+            RegulateurTransactionLocale regulateurTransactionLocale1 = nodeRPCConnection.proxy.startTrackedFlowDynamic(
+                    RegulateurTransactionLocaleReadFlowInitiator.class, pays).getReturnValue().get();
+            System.out.println(regulateurTransactionLocale1);
+            return regulateurTransactionLocale1;
+        }catch (Exception e){
+            e.printStackTrace();
+        return null;
     }
 
 //    public String getToken( AccountIdAndPassword accountIdAndPassword){
@@ -272,3 +382,4 @@ public class CentralBankInterfaceImp implements CentralBankInterface {
 //        }
 //    }
     }
+}

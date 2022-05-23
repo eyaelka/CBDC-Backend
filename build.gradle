@@ -101,6 +101,14 @@ task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
         runSchemaMigration = true //This configuration is for any CorDapps with custom schema, We will leave this as true to avoid
         //problems for developers who are not familiar with Corda. If you are not using custom schemas, you can change
         //it to false for quicker project compiling time.
+
+        extraConfig = [
+                'dataSourceProperties.dataSourceClassName' : 'org.postgresql.ds.PGSimpleDataSource',
+                'dataSourceProperties.dataSource.url' : 'jdbc:postgresql://localhost:5432/cbdc',
+                'dataSourceProperties.dataSource.user' : 'cbdc',
+                'dataSourceProperties.dataSource.password' : 'cbdc'
+        ]
+        drivers = ['/home/eya/Desktop/temp/temporaire-cbdc-project/postgresql-42.3.5.jar']
     }
     node {
         name "O=Notary,L=London,C=GB"

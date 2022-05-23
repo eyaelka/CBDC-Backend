@@ -29,7 +29,7 @@ public class UserDetailsServiceImplementation implements UserDetailsService{
 
     public UserDetails loadUserByUsername(String accountId) throws UsernameNotFoundException {
         try {
-            if (accountId.substring(accountId.length()-3).equals("bc")) {
+            if (accountId.endsWith("bc")) {
                 //bc = bank central
                 AccountIdAndPassword accountIdAndPassword = nodeRPCConnection.proxy.startTrackedFlowDynamic(
                         LoadCentralBankByAccountIdFlowInitiator.class, accountId).getReturnValue().get();

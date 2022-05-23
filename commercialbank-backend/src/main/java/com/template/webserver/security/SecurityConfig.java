@@ -45,7 +45,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
         //http.authorizeRequests().antMatchers(HttpMethod.POST,"/commercialbank/create").hasAuthority("commercialbank");
         http.authorizeRequests().antMatchers(HttpMethod.POST,"/commercialbank/saveotheraccount").hasAuthority("commercialbank");
         http.authorizeRequests().antMatchers(HttpMethod.POST,"commercialbank/update").hasAuthority("commercialbank");
-        http.authorizeRequests().antMatchers(HttpMethod.POST, "/commercialbank/deleteOrActiveOrSwithAccountType").hasAuthority("centralbank");
+        http.authorizeRequests().antMatchers(HttpMethod.POST, "/commercialbank/deleteOrActiveOrSwithAccountType").hasAuthority("commercialbank");
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(new CommercialBankAuthenticationFilter(authenticationManager()));
         http.addFilterBefore(new CommercialBankAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
