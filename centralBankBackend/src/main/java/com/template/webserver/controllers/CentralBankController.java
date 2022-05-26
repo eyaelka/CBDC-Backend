@@ -84,8 +84,8 @@ public class CentralBankController {
         return  centralBankInterface.defineDeviseRegulation(regulateurDevise);
     }
 
-    @GetMapping("/politique/regulationdevise/{pays}")
-    public RegulateurDevise getLastRegulattionDevise(@PathVariable String pays){
+    @PostMapping("/politique/regulationdevise")
+    public RegulateurDevise getLastRegulattionDevise(@RequestBody String pays){
         return centralBankInterface.getLastRegulattionDevise(pays);
     }
 

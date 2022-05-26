@@ -65,9 +65,9 @@ public class RegulateurTransactionInterPaysContract implements Contract {
         }
 
         //Constraints on the signers
-        if (!command.getSigners().containsAll(regulateurTransactionInterPaysStates.getParticipants().stream().map(AbstractParty::getOwningKey).collect(Collectors.toList()))) {
-            throw new IllegalArgumentException("les parties prenantes doivent signer");
-        }
+//        if (!command.getSigners().containsAll(regulateurTransactionInterPaysStates.getParticipants().stream().map(AbstractParty::getOwningKey).collect(Collectors.toList()))) {
+//            throw new IllegalArgumentException("les parties prenantes doivent signer");
+//        }
     }
 
     // Used to indicate the transaction's intent.

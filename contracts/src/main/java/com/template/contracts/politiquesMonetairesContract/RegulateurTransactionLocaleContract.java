@@ -58,11 +58,11 @@ public class RegulateurTransactionLocaleContract implements Contract {
         if (regulateurTransactionLocaleStates.getRegulateurTransactionLocale().getPeriode() < 0) {
             throw new IllegalArgumentException(" Periode doit être >=0");
         }
-
-        //Constraints on the signers
-        if (!command.getSigners().containsAll(regulateurTransactionLocaleStates.getParticipants().stream().map(AbstractParty::getOwningKey).collect(Collectors.toList()))) {
-            throw new IllegalArgumentException("les parties prenantes doivent signer");
-        }
+//
+//        //Constraints on the signers
+//        if (!command.getSigners().containsAll(regulateurTransactionLocaleStates.getParticipants().stream().map(AbstractParty::getOwningKey).collect(Collectors.toList()))) {
+//            throw new IllegalArgumentException("les parties prenantes doivent signer");
+//        }
     }
 
     // Used to indicate the transaction's intent.

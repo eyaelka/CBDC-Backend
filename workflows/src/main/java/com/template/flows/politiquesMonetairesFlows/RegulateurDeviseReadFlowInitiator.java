@@ -12,15 +12,19 @@ import net.corda.core.utilities.ProgressTracker;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @InitiatingFlow
 @StartableByRPC
 public class RegulateurDeviseReadFlowInitiator extends FlowLogic<RegulateurDevise> {
 
-    private String pays;
+    private final String pays;
     private final ProgressTracker progressTracker = new ProgressTracker();
 
     public RegulateurDeviseReadFlowInitiator(String pays) {
+        System.out.println("Constructeur");
+
         this.pays =pays;
     }
 
@@ -31,17 +35,36 @@ public class RegulateurDeviseReadFlowInitiator extends FlowLogic<RegulateurDevis
     @Suspendable
     @Override
     public RegulateurDevise call() throws FlowException {
+
         List<StateAndRef<RegulateurDeviseStates>> stateAndRefList =
                 getServiceHub().getVaultService().queryBy(RegulateurDeviseStates.class).getStates();
-        AtomicReference<RegulateurDevise> regulateurDeviseStatesToReturn = null;
-        stateAndRefList.forEach(deviseStatesStateAndRef -> {
-            RegulateurDevise regulateurDevise =
-                    deviseStatesStateAndRef.getState().getData().getRegulateurDevise();
-            if (regulateurDevise.getPays().equals(pays)){
-                regulateurDeviseStatesToReturn.set(regulateurDevise);
-            }
-        });
-        return regulateurDeviseStatesToReturn.get();
+        //AtomicReference<RegulateurDevise> regulateurDeviseStatesToReturn = null;
+        ///////////////////
+
+        Stream<StateAndRef<RegulateurDeviseStates>> regulateurDeviseStates =
+                stateAndRefList.stream().filter(
+                        regulateurDeviseState1 -> regulateurDeviseState1.
+                                getState().getData().getRegulateurDevise().getPays().equals(pays));
+        System.out.println(regulateurDeviseStates);
+
+        List<StateAndRef<RegulateurDeviseStates>> regulateurDeviseState =
+                regulateurDeviseStates.collect(Collectors.toList());
+        System.out.println(regulateurDeviseState);
+        return  regulateurDeviseState.get(0).getState().getData().getRegulateurDevise();
+
+        //////////////////////
+//        stateAndRefList.forEach(deviseStatesStateAndRef -> {
+//            RegulateurDevise regulateurDevise =
+//                    deviseStatesStateAndRef.getState().getData().getRegulateurDevise();
+//            System.out.println(regulateurDevise);
+//            if (regulateurDevise.getPays().equals(pays)){
+//                System.out.println("je suis dans if");
+//                regulateurDeviseStatesToReturn.set(regulateurDevise);
+//                System.out.println(regulateurDeviseStatesToReturn.get());
+//            }
+//        });
+//        System.out.println(regulateurDeviseStatesToReturn.get());
+//        return regulateurDeviseStatesToReturn.get();
     }
 }
 

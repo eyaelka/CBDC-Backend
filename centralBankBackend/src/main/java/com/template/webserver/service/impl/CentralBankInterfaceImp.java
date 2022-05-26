@@ -325,10 +325,10 @@ public class CentralBankInterfaceImp implements CentralBankInterface {
 
     @Override
     public RegulateurTransactionLocale defineTransactionLocaleRegulation(RegulateurTransactionLocale regulateurTransactionLocale) {
+        System.out.println(regulateurTransactionLocale);
         try{
             RegulateurTransactionLocale regulateurTransactionLocale1 = nodeRPCConnection.proxy.startTrackedFlowDynamic(
                     RegulateurTransactionLocaleCreatorFlowInitiator.class, regulateurTransactionLocale).getReturnValue().get();
-            System.out.println(regulateurTransactionLocale1);
             return regulateurTransactionLocale1;
         }catch (Exception e){
             e.printStackTrace();

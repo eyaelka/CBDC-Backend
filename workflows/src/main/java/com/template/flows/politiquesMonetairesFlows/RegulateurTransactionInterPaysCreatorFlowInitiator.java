@@ -10,6 +10,7 @@ import com.template.states.politiquesMonetairesStates.RegulateurTransactionInter
 import net.corda.core.contracts.Command;
 import net.corda.core.contracts.UniqueIdentifier;
 import net.corda.core.flows.*;
+import net.corda.core.identity.CordaX500Name;
 import net.corda.core.identity.Party;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
@@ -42,11 +43,15 @@ public class RegulateurTransactionInterPaysCreatorFlowInitiator extends FlowLogi
         Party centralBankNode = getOurIdentity();
         Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
         List<Party> partyList = new ArrayList<>();
-        getServiceHub().getNetworkMapCache().getAllNodes().forEach(nodeInfo -> {
-            if (notary != nodeInfo.getLegalIdentities().get(0) && centralBankNode != nodeInfo.getLegalIdentities().get(0)) {
-                partyList.add(nodeInfo.getLegalIdentities().get(0));
-            }
-        });
+//        Party endUserNode = getServiceHub().getNetworkMapCache().getPeerByLegalName(new CordaX500Name("endUserNode","Tunisie","TN"));
+//        Party merchant = getServiceHub().getNetworkMapCache().getPeerByLegalName(new CordaX500Name("merchant","Tunisie","TN"));
+        Party PartyB = getServiceHub().getNetworkMapCache().getPeerByLegalName(new CordaX500Name("PartyB","New York","US"));
+        partyList.add(PartyB);
+//        getServiceHub().getNetworkMapCache().getAllNodes().forEach(nodeInfo -> {
+//            if (notary != nodeInfo.getLegalIdentities().get(0) && centralBankNode != nodeInfo.getLegalIdentities().get(0)) {
+//                partyList.add(nodeInfo.getLegalIdentities().get(0));
+//            }
+//        });
 
         RegulateurTransactionInterPaysStates regulateurTransactionInterPaysStates = null;
         for (int i = 0; i < partyList.size(); i++) {
