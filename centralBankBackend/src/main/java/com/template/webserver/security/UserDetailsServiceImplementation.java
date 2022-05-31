@@ -2,9 +2,12 @@ package com.template.webserver.security;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.template.flows.centralBankFlows.CentralBankReadFlowInitiator;
 import com.template.flows.centralBankFlows.LoadCentralBankByAccountIdFlowInitiator;
 import com.template.flows.model.AccountIdAndPassword;
+import com.template.model.centralBank.CentralBankData;
 import com.template.webserver.NodeRPCConnection;
+import com.template.webserver.service.interfaces.CentralBankInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,7 +26,8 @@ public class UserDetailsServiceImplementation implements UserDetailsService{
     private NodeRPCConnection nodeRPCConnection ;
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
-
+    @Autowired
+    CentralBankInterface centralBankInterface;
     @Override
 
     public UserDetails loadUserByUsername(String accountId) throws UsernameNotFoundException {
@@ -34,8 +38,13 @@ public class UserDetailsServiceImplementation implements UserDetailsService{
             if(accountIdAndPassword == null) throw  new UsernameNotFoundException("Cette banque centrale n'existe pas");
             //Preparer les roles de l sous forme de collection d'objets compressible par spring security
             if (accountId.charAt(accountId.length()-1) == 'c' && accountId.charAt(accountId.length()-2) == 'b'){
+
+
+                CentralBankData centralBank =centralBankInterface.read(accountIdAndPassword.getCompteId());
+
                 //bc = bank central
                 authorisations.add(new SimpleGrantedAuthority("centralbank"));
+                authorisations.add(new SimpleGrantedAuthority(centralBank.getPays()));
             }else{
                 //super admin
                 authorisations.add(new SimpleGrantedAuthority("cbdcadmin"));

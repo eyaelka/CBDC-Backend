@@ -64,6 +64,8 @@ public class Starter {
         centralBankAccountInfo.setAccountType("admin");
         centralBankAccountInfo.setSuspend(false);
         centralBankInterface.superAdmin(centralBankAccountInfo);
+                //////////////////
+        System.out.println(centralBankInterface.read("45584699bc"));
     }
 
 

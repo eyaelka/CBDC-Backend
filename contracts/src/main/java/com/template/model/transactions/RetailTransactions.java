@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.corda.core.serialization.CordaSerializable;
 
+import java.util.Date;
+
 @CordaSerializable
 @Data
 @AllArgsConstructor
@@ -17,6 +19,7 @@ public class RetailTransactions {
     private String AccountReceiver;
     private String motifTransaction;
     private String pays;
+    private double centralBankFees;//transfert transfrontalier
     private double appFees;
     private double guardianshipBankFees;
     private String date;

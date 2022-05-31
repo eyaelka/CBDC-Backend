@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.corda.core.serialization.CordaSerializable;
 
+import java.util.Date;
+
 @CordaSerializable
 @Data
 @AllArgsConstructor

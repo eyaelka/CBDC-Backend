@@ -3,20 +3,27 @@ package com.template.webserver.controllers;
 import com.template.flows.model.AccountIdAndPassword;
 import com.template.flows.model.CentralBankAccountInfo;
 import com.template.flows.model.NewCentralBankAccount;
+import com.template.flows.model.TransactionInterbancaire;
 import com.template.model.centralBank.CentralBankData;
+import com.template.model.commercialBank.CommercialBank;
 import com.template.model.politiquesMonetaires.RegulateurDevise;
 import com.template.model.politiquesMonetaires.RegulateurMasseMonnetaire;
 import com.template.model.politiquesMonetaires.RegulateurTransactionInterPays;
 import com.template.model.politiquesMonetaires.RegulateurTransactionLocale;
+import com.template.model.transactions.TransactionInterBanks;
+import com.template.states.commercialBankStates.CommercialBankState;
 import com.template.webserver.model.CentralBankUpdateModel;
 import com.template.webserver.model.SuspendOrActiveOrSwithAccountTypeModel;
 import com.template.webserver.service.interfaces.CentralBankInterface;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import net.corda.core.contracts.StateAndRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  *  Central bank API endpoints.
@@ -84,8 +91,8 @@ public class CentralBankController {
         return  centralBankInterface.defineDeviseRegulation(regulateurDevise);
     }
 
-    @PostMapping("/politique/regulationdevise")
-    public RegulateurDevise getLastRegulattionDevise(@RequestBody String pays){
+    @GetMapping("/politique/regulationdevise/{pays}")
+    public RegulateurDevise getLastRegulattionDevise(@PathVariable String pays){
         return centralBankInterface.getLastRegulattionDevise(pays);
     }
 
@@ -95,7 +102,7 @@ public class CentralBankController {
     }
 
     @GetMapping("/politique/txregulationinterpays/{pays}")
-    public RegulateurMasseMonnetaire getLastRegulationTransactionInterPays(@PathVariable String pays){
+    public RegulateurTransactionInterPays getLastRegulationTransactionInterPays(@PathVariable String pays){
         return centralBankInterface.getLastRegulationTransactionInterPays(pays);
     }
 
@@ -108,4 +115,36 @@ public class CentralBankController {
     public RegulateurTransactionLocale getLastRegulationTransactionLocaleString(@PathVariable String pays){
         return centralBankInterface.getLastRegulationTransactionLocaleString(pays);
     }
-}
+
+    //Création CBDC
+    @PostMapping("/createmoney")
+    public TransactionInterBanks createMoney(@RequestBody TransactionInterbancaire transactionInterBancaire){
+        return centralBankInterface.createMoney(transactionInterBancaire);
+    }
+
+    @PostMapping("/interbanktransaction")
+    public TransactionInterBanks  createTransaction(@RequestBody TransactionInterbancaire transactionInterbancaire){
+        return centralBankInterface.createTransaction(transactionInterbancaire);
+    }
+
+    @GetMapping("/getCommercialBankByCountry/{pays}")
+    public List<CommercialBank> getCommercialBankByCountry(@PathVariable String pays){
+        return centralBankInterface.getCommercialBankByCountry(pays);
+    }
+
+
+    @GetMapping("/getAllCommercialBanks")
+    public List<CommercialBank> getAllCommercialBanks(){
+        return centralBankInterface.getAllCommercialBanks();
+    }
+
+    @GetMapping("/getCurrentBalance")
+        public Double getCurrentBalance(){
+            return centralBankInterface.getCurrentBalance();
+        }
+    }
+
+
+
+
+

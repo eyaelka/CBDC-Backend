@@ -3,8 +3,10 @@ package com.template.flows.politiquesMonetairesFlows;
 import co.paralleluniverse.fibers.Suspendable;
 
 import com.template.model.politiquesMonetaires.RegulateurTransactionInterPays;
+import com.template.model.politiquesMonetaires.RegulateurTransactionLocale;
 import com.template.states.politiquesMonetairesStates.RegulateurDeviseStates;
 import com.template.states.politiquesMonetairesStates.RegulateurTransactionInterPaysStates;
+import com.template.states.politiquesMonetairesStates.RegulateurTransactionLocaleStates;
 import net.corda.core.contracts.StateAndRef;
 import net.corda.core.flows.FlowException;
 import net.corda.core.flows.FlowLogic;
@@ -12,6 +14,7 @@ import net.corda.core.flows.InitiatingFlow;
 import net.corda.core.flows.StartableByRPC;
 import net.corda.core.utilities.ProgressTracker;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -35,29 +38,17 @@ public class RegulateurTransactionInterPaysReadFlowInitiator extends FlowLogic<R
     @Suspendable
     @Override
     public RegulateurTransactionInterPays call() throws FlowException {
-        List<StateAndRef<RegulateurTransactionInterPaysStates>> stateAndRefList =
+
+        List<StateAndRef<RegulateurTransactionInterPaysStates>> allTxLocal =
                 getServiceHub().getVaultService().queryBy(RegulateurTransactionInterPaysStates.class).getStates();
-        //AtomicReference<RegulateurTransactionInterPays> regulateurTransactionInterPaysToReturn = null;
-        Stream<StateAndRef<RegulateurTransactionInterPaysStates>> regulateurTransactionInterPaysStates =
-                stateAndRefList.stream().filter(
-                        regulateurTransactionInterPaysState1 -> regulateurTransactionInterPaysState1.
-                                getState().getData().getRegulateurTransactionInterPays().getPays().equals(pays));
-        System.out.println(regulateurTransactionInterPaysStates);
-
-        List<StateAndRef<RegulateurTransactionInterPaysStates>> regulateurTransactionInterPaysState =
-                regulateurTransactionInterPaysStates.collect(Collectors.toList());
-        System.out.println(regulateurTransactionInterPaysState);
-        return  regulateurTransactionInterPaysState.get(0).getState().getData().getRegulateurTransactionInterPays();
-
-
-//        stateAndRefList.forEach(regulateurTransactionInterPaysStatesStateAndRef ->{
-//            RegulateurTransactionInterPays regulateurTransactionInterPays =
-//                    regulateurTransactionInterPaysStatesStateAndRef.getState().getData().getRegulateurTransactionInterPays();
-//            if (regulateurTransactionInterPays.getPaysBanqueCentral().equals(pays)){
-//                regulateurTransactionInterPaysToReturn.set(regulateurTransactionInterPays);
-//            }
-//        });
-//        return regulateurTransactionInterPaysToReturn.get();
+        List<RegulateurTransactionInterPays> filtered = new ArrayList<>();
+        for (StateAndRef<RegulateurTransactionInterPaysStates> regulateurTxInterpays : allTxLocal){
+            RegulateurTransactionInterPaysStates states = regulateurTxInterpays.getState().getData();
+            if (states.getRegulateurTransactionInterPays().getPaysBanqueCentral().equalsIgnoreCase(pays)){
+                filtered.add(regulateurTxInterpays.getState().getData().getRegulateurTransactionInterPays());
+            }
+        }
+        return filtered.get(filtered.size()-1);
     }
 }
 

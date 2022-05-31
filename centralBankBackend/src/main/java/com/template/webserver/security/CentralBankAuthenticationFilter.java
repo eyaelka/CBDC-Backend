@@ -2,12 +2,17 @@ package com.template.webserver.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.template.flows.model.AccountIdAndPassword;
+import com.template.model.centralBank.CentralBank;
+import com.template.model.centralBank.CentralBankData;
+import com.template.webserver.service.interfaces.CentralBankInterface;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -16,7 +21,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicReference;
 
 /*
  * Filtre d'extraction de l'utilisateurs
@@ -33,10 +41,11 @@ public class CentralBankAuthenticationFilter extends UsernamePasswordAuthenticat
     /*
      * Methode d'extraction de l'utilisateur
      */
+
+    AccountIdAndPassword accountIdAndPassword = null;
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
-        AccountIdAndPassword accountIdAndPassword = null;
         try {
             accountIdAndPassword = new ObjectMapper().readValue(request.getInputStream(), AccountIdAndPassword.class);
             System.out.println( accountIdAndPassword );
