@@ -1,11 +1,10 @@
 package com.template.webserver.service.impl;
 
 import com.template.flows.endUserFlows.*;
-import com.template.flows.model.AccountIdAndPassword;
-import com.template.flows.model.EndUserAccountInfo;
-import com.template.flows.model.NewEndUserAccount;
-import com.template.flows.model.SuspendOrActiveOrSwithAccountType;
+import com.template.flows.model.*;
+import com.template.flows.transactionsFlow.EndUserRetailTransactionsFlowInitiator;
 import com.template.model.endUser.EndUserData;
+import com.template.model.transactions.RetailTransactions;
 import com.template.states.commercialBankStates.CommercialBankState;
 import com.template.states.endUserStates.EndUserState;
 import com.template.webserver.NodeRPCConnection;
@@ -18,6 +17,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import net.corda.core.contracts.StateAndRef;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.mail.MessagingException;
 import javax.transaction.Transactional;
@@ -248,6 +248,18 @@ public class EndUserInterfaceImpl implements EndUserInterface {
         }catch (Exception e){
             return -1;
         }
+
+    }
+
+    public RetailTransactions doTransaction(TransactionDetail transactionDetail){
+        System.out.println("TX Data in service :"+transactionDetail);
+        try {
+            return  nodeRPCConnection.proxy.startTrackedFlowDynamic(
+                    EndUserRetailTransactionsFlowInitiator.class,transactionDetail).getReturnValue().get();
+        }catch (Exception exception){
+            return null;
+        }
+
 
     }
 

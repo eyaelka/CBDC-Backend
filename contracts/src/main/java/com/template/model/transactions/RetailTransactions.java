@@ -12,15 +12,17 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RetailTransactions {
-    private String AccountSender;
+    private String accountSender;
     private double defaultAmount;
     private double currentAmount;
     private double amountToTransfert;
-    private String AccountReceiver;
+    private String accountReceiver;
     private String motifTransaction;
     private String pays;
     private double centralBankFees;//transfert transfrontalier
     private double appFees;
     private double guardianshipBankFees;
     private String date;
+    private String nomDevise;
 }
+

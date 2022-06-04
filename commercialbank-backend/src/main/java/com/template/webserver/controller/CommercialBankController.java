@@ -2,6 +2,7 @@ package com.template.webserver.controller;
 
 import com.template.flows.model.*;
 import com.template.model.commercialBank.CommercialBankData;
+import com.template.model.transactions.TransactionInterBanks;
 import com.template.states.commercialBankStates.CommercialBankState;
 import com.template.webserver.model.CommercialBankUpdateModel;
 import com.template.webserver.service.interfaces.CommercialBankInterface;
@@ -59,6 +60,11 @@ public class CommercialBankController {
     @PostMapping("/commercialbank/saveotheraccount")
     public AccountIdAndPassword createOtherMerchantCount(@RequestBody NewCommercialBankAccount newCommercialBankAccount){
         return commercialBankInterface.createOtherCommercialBankAccount(newCommercialBankAccount);
+    }
+
+    @PostMapping("/interbanktransaction")
+    public TransactionInterBanks createTransaction(@RequestBody TransactionInterbancaire transactionInterbancaire){
+        return commercialBankInterface.createTransaction(transactionInterbancaire);
     }
 
 }

@@ -19,32 +19,56 @@ public class TransactionInterBanksContract implements Contract {
         if(tx.getCommands().size() == 1){
             createurCBDC(tx, tx.getCommands().get(0).getSigners());
         }else {
-            // vérifications du contenu de la transaction: montants, compte, fais, et autres
-            tx.getCommands().forEach(commandDataCommandWithParties -> {
-                if (commandDataCommandWithParties.getValue() instanceof
-                        TransactionInterBanksContract.VerifyOwnerRestMonneyTransactionCommand) {
-                    //cas de l'output 1
-                    // verify owner rest monney transaction
-                    verifyOwnerRestMonney(tx, commandDataCommandWithParties.getSigners());
-                } else if (commandDataCommandWithParties.getValue() instanceof
-                        TransactionInterBanksContract.VerifyTransactionCommand) {
-                    //cas de l'output 2
-                    // verify real transaction
-                    verifyTX(tx, commandDataCommandWithParties.getSigners());
-                } else if (commandDataCommandWithParties.getValue() instanceof
-                        TransactionInterBanksContract.VerifyCentralBankFeesTXCommand) {
-                    //cas de l'output 4
-                    // verify central bank fees tranction
-                    verifyCentralBankFees(tx, commandDataCommandWithParties.getSigners());
-                } else if (commandDataCommandWithParties.getValue() instanceof
-                        TransactionInterBanksContract.VerifyAppFeesTXCommand) {
-                    //cas de output 5
-                    // verify appFees tx
-                    verifyAppFees(tx, commandDataCommandWithParties.getSigners());
-                } else {
-                    throw new IllegalArgumentException("Intentio (command) invalide");
-                }
-            });
+            if(tx.getCommands().size() == 3) {
+                // vérifications du contenu de la transaction: montants, compte, fais, et autres
+                tx.getCommands().forEach(commandDataCommandWithParties -> {
+                    if (commandDataCommandWithParties.getValue() instanceof
+                            TransactionInterBanksContract.VerifyOwnerRestMonneyTransactionCommand) {
+                        //cas de l'output 1
+                        // verify owner rest monney transaction
+                        verifyOwnerRestMonney(tx, commandDataCommandWithParties.getSigners());
+                    } else if (commandDataCommandWithParties.getValue() instanceof
+                            TransactionInterBanksContract.VerifyTransactionCommand) {
+                        //cas de l'output 2
+                        // verify real transaction
+                        verifyTX(tx, commandDataCommandWithParties.getSigners());
+                    } else if (commandDataCommandWithParties.getValue() instanceof
+                            TransactionInterBanksContract.VerifyAppFeesTXCommand) {
+                        //cas de output 5
+                        // verify appFees tx
+                        verifyAppFees(tx, commandDataCommandWithParties.getSigners());
+                    } else {
+                        throw new IllegalArgumentException("Intentio (command) invalide");
+                    }
+                });
+            }else{
+                // vérifications du contenu de la transaction: montants, compte, fais, et autres
+                tx.getCommands().forEach(commandDataCommandWithParties -> {
+                    if (commandDataCommandWithParties.getValue() instanceof
+                            TransactionInterBanksContract.VerifyOwnerRestMonneyTransactionCommand) {
+                        //cas de l'output 1
+                        // verify owner rest monney transaction
+                        verifyOwnerRestMonney(tx, commandDataCommandWithParties.getSigners());
+                    } else if (commandDataCommandWithParties.getValue() instanceof
+                            TransactionInterBanksContract.VerifyTransactionCommand) {
+                        //cas de l'output 2
+                        // verify real transaction
+                        verifyTX(tx, commandDataCommandWithParties.getSigners());
+                    }else if (commandDataCommandWithParties.getValue() instanceof
+                            TransactionInterBanksContract.VerifyCentralBankFeesTXCommand) {
+                        //cas de l'output 3
+                        // verify central bank fees tranction
+                        verifyCentralBankFees(tx, commandDataCommandWithParties.getSigners());
+                    }else if (commandDataCommandWithParties.getValue() instanceof
+                            TransactionInterBanksContract.VerifyAppFeesTXCommand) {
+                        //cas de output 3
+                        // verify appFees tx
+                        verifyAppFees(tx, commandDataCommandWithParties.getSigners());
+                    } else {
+                        throw new IllegalArgumentException("Intentio (command) invalide");
+                    }
+                });
+            }
         }
     }
 
@@ -135,7 +159,7 @@ public class TransactionInterBanksContract implements Contract {
     }
 
     private void verifyCentralBankFees(@NotNull LedgerTransaction tx, @NotNull List<PublicKey> requiredSigners){
-        TransactionInterBanksStates output3 = tx.outputsOfType(TransactionInterBanksStates.class).get(3);
+        TransactionInterBanksStates output3 = tx.outputsOfType(TransactionInterBanksStates.class).get(2);
         if(output3 != null){// s'il s'agit d'une Tx fransfrontalière
             TransactionInterBanks transactionInterBank = output3.getTransactionInterBank();
 //            if (! requiredSigners.containsAll(output3.getParticipants())){
@@ -172,7 +196,14 @@ public class TransactionInterBanksContract implements Contract {
     }
 
     private void verifyAppFees(@NotNull LedgerTransaction tx, @NotNull List<PublicKey> requiredSigners){
-        TransactionInterBanksStates output4 = tx.outputsOfType(TransactionInterBanksStates.class).get(4);
+        TransactionInterBanksStates output4;
+        if (tx.getOutputs().size() == 3){
+            output4 = tx.outputsOfType(TransactionInterBanksStates.class).get(2);
+
+        }else{
+             output4 = tx.outputsOfType(TransactionInterBanksStates.class).get(3);
+
+        }
         if (output4 == null || output4.getTransactionInterBank()==null){
             throw new IllegalArgumentException("Output lié à la banque de tutelle est null");
         }

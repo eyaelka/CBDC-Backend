@@ -40,7 +40,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         //donner la permission à tous les utilisateurs de s'authentifier ou de s'enregistrer
-        http.authorizeRequests().antMatchers("/login/**","/commercialbank/create","commercialbank/update").permitAll();
+        http.authorizeRequests().antMatchers("/login/**","/commercialbank/create","commercialbank/update","/interbanktransaction").permitAll();
         //donner les permissions
         //http.authorizeRequests().antMatchers(HttpMethod.POST,"/commercialbank/create").hasAuthority("commercialbank");
         http.authorizeRequests().antMatchers(HttpMethod.POST,"/commercialbank/saveotheraccount").hasAuthority("commercialbank");

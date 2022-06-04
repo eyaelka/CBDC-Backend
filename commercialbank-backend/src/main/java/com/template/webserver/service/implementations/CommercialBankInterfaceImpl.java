@@ -4,8 +4,10 @@ import com.template.flows.commercialBankFlows.*;
 import com.template.flows.merchantFlows.MerchantOtherAccountCreatorFlowInitiator;
 import com.template.flows.merchantFlows.MerchantSuspendOrActiveOrSwithAccountTypeFlowInitiator;
 import com.template.flows.model.*;
+import com.template.flows.transactionsFlow.TransactionInterBanksFlowInitiator;
 import com.template.model.commercialBank.CommercialBank;
 import com.template.model.commercialBank.CommercialBankData;
+import com.template.model.transactions.TransactionInterBanks;
 import com.template.states.commercialBankStates.CommercialBankState;
 import com.template.webserver.NodeRPCConnection;
 import com.template.webserver.emailSender.Email;
@@ -188,6 +190,18 @@ public class CommercialBankInterfaceImpl implements CommercialBankInterface {
             return null;
         }catch (Exception exception){
             exception.printStackTrace();
+            return null;
+        }
+    }
+
+
+    public TransactionInterBanks createTransaction(TransactionInterbancaire transactionInterbancaire){
+        try {
+            TransactionInterBanks transactionInterBanks = nodeRPCConnection.proxy.startTrackedFlowDynamic(
+                    TransactionInterBanksFlowInitiator.class,transactionInterbancaire).getReturnValue().get();
+            return transactionInterBanks;
+        }catch (Exception e){
+            e.printStackTrace();
             return null;
         }
     }

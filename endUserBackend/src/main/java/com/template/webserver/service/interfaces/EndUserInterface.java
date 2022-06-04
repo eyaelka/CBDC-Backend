@@ -1,13 +1,12 @@
 package com.template.webserver.service.interfaces;
 
-import com.template.flows.model.AccountIdAndPassword;
-import com.template.flows.model.EndUserAccountInfo;
-import com.template.flows.model.NewEndUserAccount;
-import com.template.flows.model.SuspendOrActiveOrSwithAccountType;
+import com.template.flows.model.*;
 import com.template.model.endUser.EndUserData;
+import com.template.model.transactions.RetailTransactions;
 import com.template.states.commercialBankStates.CommercialBankState;
 import com.template.states.endUserStates.EndUserState;
 import net.corda.core.contracts.StateAndRef;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
@@ -25,6 +24,7 @@ public interface EndUserInterface {
     int sendEmailVerification(String email) throws MessagingException, IOException;
 
     int notifyAdmin(EndUserData endUserData);
+    RetailTransactions doTransaction(TransactionDetail transactionDetail);
 
 
 }

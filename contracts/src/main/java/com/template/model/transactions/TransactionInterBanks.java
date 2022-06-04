@@ -22,4 +22,5 @@ public class TransactionInterBanks {
     private double appFees;
     private double centralBankFees;// centralBankFees >0 si la TX est transfrontalière
     private String date;
+    private String nameDevise;
 }

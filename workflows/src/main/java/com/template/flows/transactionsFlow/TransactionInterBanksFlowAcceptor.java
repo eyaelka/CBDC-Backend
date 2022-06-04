@@ -1,6 +1,7 @@
 package com.template.flows.transactionsFlow;
 
 import co.paralleluniverse.fibers.Suspendable;
+import com.template.states.transactionsStates.RetailTransactionsStates;
 import com.template.states.transactionsStates.TransactionInterBanksStates;
 import net.corda.core.contracts.ContractState;
 import net.corda.core.crypto.SecureHash;
@@ -29,10 +30,36 @@ public class TransactionInterBanksFlowAcceptor extends FlowLogic<Void> {
             @Override
             protected void checkTransaction(SignedTransaction stx) {
                 requireThat(require -> {
-                    ContractState output = stx.getTx().getOutputs().get(0).getData();
-                    System.out.println("Bonjour EYA la princesse");
-                    require.using("Ce n'est pas une transaction TransactionInterBanksStates .",
-                            output instanceof TransactionInterBanksStates);
+                    if (stx.getTx().getOutputs().size() == 1){
+                        ContractState output = stx.getTx().getOutputs().get(0).getData();
+                        System.out.println("Bonjour EYA la princesse");
+                        require.using("Ce n'est pas une transaction TransactionInterBanksStates .",
+                                output instanceof TransactionInterBanksStates);
+                    }else if (stx.getTx().getOutputs().size() ==3){
+                        ContractState output1 = stx.getTx().getOutputs().get(0).getData();
+                        ContractState output2 = stx.getTx().getOutputs().get(1).getData();
+                        ContractState output3 = stx.getTx().getOutputs().get(2).getData();
+                        require.using("Ce n'est pas une transaction TransactionInterBanksStates .",
+                                output1 instanceof TransactionInterBanksStates);
+                        require.using("Ce n'est pas une transaction TransactionInterBanksStates .",
+                                output2 instanceof TransactionInterBanksStates);
+                        require.using("Ce n'est pas une transaction TransactionInterBanksStates .",
+                                output3 instanceof TransactionInterBanksStates);
+                    }else {
+                        ContractState output1 = stx.getTx().getOutputs().get(0).getData();
+                        ContractState output2 = stx.getTx().getOutputs().get(1).getData();
+                        ContractState output3 = stx.getTx().getOutputs().get(2).getData();
+                        ContractState output4 = stx.getTx().getOutputs().get(3).getData();
+                        require.using("Ce n'est pas une transaction TransactionInterBanksStates .",
+                                output1 instanceof TransactionInterBanksStates);
+                        require.using("Ce n'est pas une transaction TransactionInterBanksStates .",
+                                output2 instanceof TransactionInterBanksStates);
+                        require.using("Ce n'est pas une transaction TransactionInterBanksStates .",
+                                output3 instanceof TransactionInterBanksStates);
+                        require.using("Ce n'est pas une transaction TransactionInterBanksStates .",
+                                output4 instanceof TransactionInterBanksStates);
+
+                    }
                     return null;
                 });
             }

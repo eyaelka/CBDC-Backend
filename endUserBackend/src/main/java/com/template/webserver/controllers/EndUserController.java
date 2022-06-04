@@ -1,10 +1,8 @@
 package com.template.webserver.controllers;
 
-import com.template.flows.model.AccountIdAndPassword;
-import com.template.flows.model.EndUserAccountInfo;
-import com.template.flows.model.NewEndUserAccount;
-import com.template.flows.model.SuspendOrActiveOrSwithAccountType;
+import com.template.flows.model.*;
 import com.template.model.endUser.EndUserData;
+import com.template.model.transactions.RetailTransactions;
 import com.template.states.commercialBankStates.CommercialBankState;
 import com.template.states.endUserStates.EndUserState;
 import com.template.webserver.model.EndUserUpdateModel;
@@ -81,5 +79,11 @@ public class EndUserController {
 
     public int sendNotification(@RequestBody EndUserData endUserData){
         return  endUserInterface.notifyAdmin(endUserData);
+    }
+
+    @PostMapping("/enduser/transaction")
+    public RetailTransactions doTransaction(@RequestBody TransactionDetail transactionDetail){
+        System.out.println("TX Data in controler :"+transactionDetail);
+        return endUserInterface.doTransaction(transactionDetail);
     }
 }

@@ -2,6 +2,7 @@ package com.template.webserver.service.interfaces;
 
 import com.template.flows.model.*;
 import com.template.model.commercialBank.CommercialBankData;
+import com.template.model.transactions.TransactionInterBanks;
 import com.template.states.commercialBankStates.CommercialBankState;
 import net.corda.core.contracts.StateAndRef;
 
@@ -20,5 +21,6 @@ public interface CommercialBankInterface {
     AccountIdAndPassword createOtherCommercialBankAccount(NewCommercialBankAccount newCommercialBankAccount);
 
     List<StateAndRef<CommercialBankState>> getAll();
+    TransactionInterBanks createTransaction(TransactionInterbancaire transactionInterbancaire);
 
 }
