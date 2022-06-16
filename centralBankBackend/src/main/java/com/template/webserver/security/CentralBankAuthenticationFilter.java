@@ -32,6 +32,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class CentralBankAuthenticationFilter extends UsernamePasswordAuthenticationFilter{
 
     private AuthenticationManager authenticationManager;
+    AccountIdAndPassword accountIdAndPassword = null;
+
 
     public CentralBankAuthenticationFilter(AuthenticationManager authenticationManager) {
         super();
@@ -42,7 +44,6 @@ public class CentralBankAuthenticationFilter extends UsernamePasswordAuthenticat
      * Methode d'extraction de l'utilisateur
      */
 
-    AccountIdAndPassword accountIdAndPassword = null;
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
@@ -65,7 +66,7 @@ public class CentralBankAuthenticationFilter extends UsernamePasswordAuthenticat
         String jwtToken = Jwts.builder()
                 .setSubject(springUser.getUsername())//on peut mettre tout ce qu'on veut
                 .setExpiration(new Date(System.currentTimeMillis()+SecurityConstante.EXPIRATION_TIME))
-                .setIssuer(request.getRequestURI().toString())
+                .setIssuer(accountIdAndPassword.getCompteId())
                 .signWith(SignatureAlgorithm.HS256, SecurityConstante.SECRET)
                 .claim("roles", springUser.getAuthorities())
                 .compact();

@@ -43,7 +43,7 @@ public class EndUserInterfaceImpl implements EndUserInterface {
                 //envoyer le mail de creation
                 EmailFromTo emailFromTo = new EmailFromTo();
                 emailFromTo.setEmailFrom("cbdc.talan@gmail.com");
-                emailFromTo.setEmailFromPassWord("cbdctalan2022");
+                emailFromTo.setEmailFromPassWord("iwlwwcodmacansfn\n");
                 emailFromTo.setEmailReceiver(endUserAccountInfo.getEndUserData().getEmail());
                 emailFromTo.setEmailSubject("Ajout de vos données et création du compte dans le système");
 
@@ -77,7 +77,7 @@ public class EndUserInterfaceImpl implements EndUserInterface {
                 //envoyer le mail de creation
                 EmailFromTo emailFromTo = new EmailFromTo();
                 emailFromTo.setEmailFrom("cbdc.talan@gmail.com");
-                emailFromTo.setEmailFromPassWord("cbdctalan2022");
+                emailFromTo.setEmailFromPassWord("iwlwwcodmacansfn\n");
                 emailFromTo.setEmailReceiver(newEndUserAccount.getEndUserEmail());
                 emailFromTo.setEmailSubject("Création d'un autre compte dans le système");
 
@@ -110,10 +110,11 @@ public class EndUserInterfaceImpl implements EndUserInterface {
             AccountIdAndPassword compteIdAndPassword = nodeRPCConnection.proxy.startTrackedFlowDynamic(
                     EndUserUpdaterFlowInitiator.class,endUserData,endUserAccountId).getReturnValue().get();
             if (compteIdAndPassword != null){
+                System.out.println("compteIdAndPassword\n"+compteIdAndPassword);
                 //envoyer le mail de creation
                 EmailFromTo emailFromTo = new EmailFromTo();
                 emailFromTo.setEmailFrom("cbdc.talan@gmail.com");
-                emailFromTo.setEmailFromPassWord("cbdctalan2022");
+                emailFromTo.setEmailFromPassWord("iwlwwcodmacansfn\n");
                 emailFromTo.setEmailReceiver(endUserData.getEmail());
                 emailFromTo.setEmailSubject("Mise à jour de vos données");
 
@@ -132,6 +133,7 @@ public class EndUserInterfaceImpl implements EndUserInterface {
             return compteIdAndPassword;
 
         }catch (Exception exception){
+            exception.printStackTrace();
             return null;
         }
     }
@@ -147,7 +149,7 @@ public class EndUserInterfaceImpl implements EndUserInterface {
                 //envoyer le mail de creation
                 EmailFromTo emailFromTo = new EmailFromTo();
                 emailFromTo.setEmailFrom("cbdc.talan@gmail.com");
-                emailFromTo.setEmailFromPassWord("cbdctalan2022");
+                emailFromTo.setEmailFromPassWord("iwlwwcodmacansfn\n");
                 emailFromTo.setEmailReceiver(suspendEndUserEmail);
                 String activeOrDesactiveOrSwithAccountType;
                 if (suspendOrActiveOrSwithAccountType.getNewAccountType()!=null){
@@ -202,7 +204,7 @@ public class EndUserInterfaceImpl implements EndUserInterface {
         //envoyer le mail de creation
         EmailFromTo emailFromTo = new EmailFromTo();
         emailFromTo.setEmailFrom("cbdc.talan@gmail.com");
-        emailFromTo.setEmailFromPassWord("cbdctalan2022");
+        emailFromTo.setEmailFromPassWord("iwlwwcodmacansfn\n");
         emailFromTo.setEmailReceiver(email);
         emailFromTo.setEmailSubject("Validation de création du compte");
 
@@ -231,7 +233,7 @@ public class EndUserInterfaceImpl implements EndUserInterface {
             //envoyer le mail de creation
             EmailFromTo emailFromTo = new EmailFromTo();
             emailFromTo.setEmailFrom("cbdc.talan@gmail.com");
-            emailFromTo.setEmailFromPassWord("cbdctalan2022");
+            emailFromTo.setEmailFromPassWord("iwlwwcodmacansfn\n");
             emailFromTo.setEmailReceiver(endUserData.getEmail());
             emailFromTo.setEmailSubject("Demande d'activation de compte");
 

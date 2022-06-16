@@ -16,6 +16,7 @@ import com.template.model.transactions.RetailTransactions;
 import com.template.model.transactions.TransactionInterBanks;
 import com.template.states.centralBanqueStates.CentralBankState;
 import com.template.states.commercialBankStates.CommercialBankState;
+import com.template.states.politiquesMonetairesStates.RegulateurMasseMonnetaireStates;
 import com.template.states.transactionsStates.TransactionInterBanksStates;
 import net.corda.core.contracts.Command;
 import net.corda.core.contracts.StateAndRef;
@@ -28,6 +29,7 @@ import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.ProgressTracker;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -70,7 +72,7 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
         RegulateurDevise regulateurDevise = null;
         RegulateurMasseMonnetaire regulateurMasseMonnetaire = null;
         TransactionInterBanks transactionInterBank = new TransactionInterBanks();
-        TransactionInterBanks transactionInterBankReceiver = null;
+        TransactionInterBanks transactionInterBankReceiver = new TransactionInterBanks();
         double montantConvertiDevise = 0;
 
         Party receiverNode = getOurIdentity();
@@ -97,16 +99,17 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
                     lire account balance and it's info
             */
 
-            regulateurMasseMonnetaire = CommonTreatment.getRegulateurMasseMonnetaire(((CommercialBank) sender).getCommercialBankData().getPays(),getServiceHub());
-            System.out.println(regulateurMasseMonnetaire);
-
+            regulateurMasseMonnetaire = CommonTreatment.getRegulateurMasseMonnetaire(((CommercialBank) sender).getCommercialBankData().getPays(), getServiceHub());
             if (regulateurMasseMonnetaire == null){
                 return null;
             }
+
+            System.out.println("transactionInterBanks \n"+transactionInterBanks);
             //lecture de la balance de l'émetteur
-            Object senderBalanceOject = CommonTreatment.getCommercialBankBalanceObject(transactionInterBanks.getAccountSender(),
+            Object senderBalanceOject = CommonTreatment.getCommercialBankBalanceObjectForSending(transactionInterBanks.getAccountSender(),
                     ((CommercialBank) sender).getCommercialBankData().getPays(),getServiceHub());
-            System.out.println(senderBalanceOject);
+
+            System.out.println("senderBalanceOject\n"+senderBalanceOject);
             // S'il n'ya pas de balance alors anuller la TX
             if (senderBalanceOject == null){
                 return null;
@@ -116,8 +119,17 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
                 TransactionInterBanks interBanks = ((TransactionInterBanks) senderBalanceOject);
                 transactionInterBank.setCentralBankFees(interBanks.getCentralBankFees());
                 transactionInterBank.setMotifTransaction(interBanks.getMotifTransaction());
-                transactionInterBank.setAccountSender(interBanks.getAccountSender());
-                transactionInterBank.setAccountReceiver(interBanks.getAccountReceiver());
+                if (interBanks.getAccountSender().endsWith("bc")){
+                    transactionInterBank.setAccountSender(interBanks.getAccountReceiver());
+
+                    transactionInterBank.setAccountReceiver(interBanks.getAccountSender());
+
+                }else {
+                    transactionInterBank.setAccountSender(interBanks.getAccountSender());
+
+                    transactionInterBank.setAccountReceiver(interBanks.getAccountReceiver());
+                }
+
                 transactionInterBank.setCurrentAmount(interBanks.getCurrentAmount());
                 transactionInterBank.setDefaultAmount(interBanks.getDefaultAmount());
                 transactionInterBank.setAmountToTransfert(interBanks.getAmountToTransfert());
@@ -129,8 +141,14 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
 
                 transactionInterBank.setCentralBankFees(retailTX.getCentralBankFees());
                 transactionInterBank.setMotifTransaction(retailTX.getMotifTransaction());
-                transactionInterBank.setAccountSender(retailTX.getAccountSender());
-                transactionInterBank.setAccountReceiver(retailTX.getAccountReceiver());
+                if ( ! retailTX.getAccountSender().endsWith("cb")){
+                    transactionInterBank.setAccountSender(retailTX.getAccountReceiver());
+                    transactionInterBank.setAccountReceiver(retailTX.getAccountSender());
+                }else{
+                    transactionInterBank.setAccountSender(retailTX.getAccountSender());
+                    transactionInterBank.setAccountReceiver(retailTX.getAccountReceiver());
+                }
+
                 transactionInterBank.setCurrentAmount(retailTX.getCurrentAmount());
                 transactionInterBank.setDefaultAmount(retailTX.getDefaultAmount());
                 transactionInterBank.setAmountToTransfert(retailTX.getAmountToTransfert());
@@ -138,6 +156,7 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
                 transactionInterBank.setPays(retailTX.getPays());
                 transactionInterBank.setAppFees(retailTX.getAppFees());
             }
+
             System.out.println("transactionInterBank \n"+transactionInterBank);
 
             if(((CommercialBank) sender).getCommercialBankData().getPays().
@@ -150,6 +169,7 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
 
                 */
                 regulateurTransactionLocale =CommonTreatment.getRegulateurTransactionLocale(transactionInterBanks.getPays(), getServiceHub());
+                System.out.println("regulateurTransactionLocale \n"+regulateurTransactionLocale);
                 //si la reglementation TX n'est pas respecter
                 if (CommonTreatment.conformiterTransactionLocalTX(regulateurTransactionLocale.getSeuilMaximumInterbank(), regulateurTransactionLocale.getPays(),regulateurTransactionLocale.getPeriode(), transactionInterBanks.getAmountToTransfert() ,
                         transactionInterBanks.getAccountSender(), getServiceHub(), 1) < 0){
@@ -174,8 +194,12 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
                 regulateurDevise = CommonTreatment.getRegulateurDevise(((CommercialBank) sender).getCommercialBankData().getPays(),transactionInterBanks.getNameDevise(),getServiceHub());
                 montantConvertiDevise = convertisseurDevise(transactionInterBanks.getAmountToTransfert(), regulateurDevise.getTauxAchat());
             }
+            System.out.println("reserve obligatoire"+regulateurMasseMonnetaire.getTauxReserveObligatoir());
+            System.out.println("transactionInterBank.getCurrentAmount()"+transactionInterBank.getCurrentAmount());
             double montantParDefautDansCompte = preparateurMontantDeReserveObligatoir(transactionInterBank.getCurrentAmount(),
                     regulateurMasseMonnetaire.getTauxReserveObligatoir());
+
+            System.out.println("montantParDefautDansCompte \n"+montantParDefautDansCompte);
 
             //preparation de la transaction
             // Cas de la TX de mise à jour du compte initiateur de la TX
@@ -194,8 +218,8 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
                 newTransactionOutput1.setCurrentAmount(transactionInterBank.getCurrentAmount() -
                         (
                                 transactionInterBanks.getAmountToTransfert() +
-                                        transactionInterBank.getAppFees() +
-                                        transactionInterBank.getCentralBankFees()
+                                        transactionInterBanks.getAppFees() +
+                                        transactionInterBanks.getCentralBankFees()
                         )
                 );
             }else{
@@ -203,19 +227,20 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
                 newTransactionOutput1.setCurrentAmount(transactionInterBank.getCurrentAmount() -
                         (
                                 transactionInterBanks.getAmountToTransfert() +
-                                        transactionInterBank.getAppFees()
+                                        transactionInterBanks.getAppFees()
                         )
                 );
             }
 
             System.out.println("newTransactionOutput1 \n"+newTransactionOutput1);
 
+
             // cas du transfert de mise à jour du compte recepteur
             if (transactionInterBanks.getAccountReceiver().endsWith("cb")){
                 //lecture de la balance de la banque commercial
                 Object receiverBalanceOject1 = CommonTreatment.getCommercialBankBalanceObjectForReceiving(transactionInterBanks.getAccountReceiver(),
                         transactionInterBanks.getPays(),getServiceHub());
-                System.out.println("receiverBalanceOject1 \n"+receiverBalanceOject1);
+                System.out.println("receiverBalanceOject1 \n "+receiverBalanceOject1);
                 // S'il n'ya pas de balance alors anuller la TX
                 if (receiverBalanceOject1 != null){
                     transactionInterBankReceiver = new TransactionInterBanks();
@@ -250,8 +275,8 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
                 transactionInterBankReceiver = CommonTreatment.getInterbankBalanceObject(transactionInterBanks.getAccountReceiver(),
                         transactionInterBanks.getPays(), getServiceHub());
             }
-
             System.out.println("transactionInterBankReceiver \n"+transactionInterBankReceiver);
+
 
             TransactionInterBanks newTransactionOutput2 = new TransactionInterBanks();
 
@@ -277,6 +302,8 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
             newTransactionOutput2.setCurrentAmount(receiverOldBalance + newTransactionOutput2.getAmountToTransfert());
             newTransactionOutput2.setAccountReceiver(transactionInterBanks.getAccountReceiver());
 
+            System.out.println("newTransactionOutput2 \n"+newTransactionOutput2);
+
             // en cas de transfert transfrontalié, preparer la Tx des frais pour la banque centrale
             TransactionInterBanks newTransactionOutput3 = null;
             if(montantConvertiDevise !=0){
@@ -295,6 +322,7 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
                 newTransactionOutput3.setNameDevise(transactionInterBanks.getNameDevise());
 
                 CentralBank centralBank = CommonTreatment.getCentralBank(((CommercialBank) sender).getCommercialBankData().getPays(),getServiceHub());
+                System.out.println("centralBank \n"+centralBank);
                 if(centralBank == null){
                     return null;
                 }
@@ -312,13 +340,14 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
                 newTransactionOutput3.setAccountReceiver(centralBank.getCentralBankAccount().get(0).getAccountId());
 
             }
+            System.out.println("newTransactionOutput3 \n"+newTransactionOutput3);
 
             // Preparer la Tx des frais de l'application
 
             // chercher le compte de BC à partir du pays du compte emetteur
             // chercher sa balance
             //preparer output.
-            TransactionInterBanks newTransactionOutput4 = null;
+            TransactionInterBanks newTransactionOutput4 = new TransactionInterBanks();
 
             newTransactionOutput4.setMotifTransaction(transactionInterBanks.getMotifTransaction());
             newTransactionOutput4.setAccountSender(transactionInterBanks.getAccountSender());
@@ -328,6 +357,7 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
             newTransactionOutput4.setNameDevise(transactionInterBanks.getNameDevise());
 
             CentralBank appCompte = CommonTreatment.getAppCompte(((CommercialBank) sender).getCommercialBankData().getPays(),getServiceHub());
+            System.out.println("appCompte\n"+appCompte);
             if(appCompte == null){
                 return null;
             }
@@ -345,6 +375,8 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
             newTransactionOutput4.setCurrentAmount(receiverOldBalance4 + newTransactionOutput4.getAppFees());
             newTransactionOutput4.setAccountReceiver(appCompte.getCentralBankAccount().get(0).getAccountId());
 
+            System.out.println("newTransactionOutput4 \n"+newTransactionOutput4);
+
             //....... Lancement de la TX...............
 
 
@@ -357,36 +389,53 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
                     = new Command<>(new TransactionInterBanksContract.VerifyTransactionCommand(),
                     Arrays.asList(getOurIdentity().getOwningKey(),receiverNode.getOwningKey()));
 
-            final Command<TransactionInterBanksContract.VerifyCentralBankFeesTXCommand> verifyCentralBankFeesTXCommand
-                    = new Command<>(new TransactionInterBanksContract.VerifyCentralBankFeesTXCommand(),
-                    Arrays.asList(getOurIdentity().getOwningKey(),centralBankNode.getOwningKey()));
-
             final Command<TransactionInterBanksContract.VerifyAppFeesTXCommand> verifyAppFeesTXCommand
                     = new Command<>(new TransactionInterBanksContract.VerifyAppFeesTXCommand(),
                     Arrays.asList(getOurIdentity().getOwningKey(), centralBankNode.getOwningKey()));
 
+
+
+
+
             //Preparation des outputs
             TransactionInterBanksStates output1 = new TransactionInterBanksStates(newTransactionOutput1,getOurIdentity(),getOurIdentity(), new UniqueIdentifier());
             TransactionInterBanksStates output2 = new TransactionInterBanksStates(newTransactionOutput2,getOurIdentity(),receiverNode, new UniqueIdentifier());
-            TransactionInterBanksStates output3 = new TransactionInterBanksStates(newTransactionOutput3,getOurIdentity(),centralBankNode, new UniqueIdentifier());
             TransactionInterBanksStates output4 = new TransactionInterBanksStates(newTransactionOutput4,getOurIdentity(),centralBankNode, new UniqueIdentifier());
-
-            // build TX
             final TransactionBuilder builder = new TransactionBuilder(notary);
+            // build TX
             //adding all output states
             builder.addOutputState(output1);
             builder.addOutputState(output2);
-            builder.addOutputState(output3);
+            if (newTransactionOutput3 != null){
+                final Command<TransactionInterBanksContract.VerifyCentralBankFeesTXCommand> verifyCentralBankFeesTXCommand
+                        = new Command<>(new TransactionInterBanksContract.VerifyCentralBankFeesTXCommand(),
+                        Arrays.asList(getOurIdentity().getOwningKey(),centralBankNode.getOwningKey()));
+                TransactionInterBanksStates output3 = new TransactionInterBanksStates(newTransactionOutput3,getOurIdentity(),centralBankNode, new UniqueIdentifier());
+                builder.addOutputState(output3);
+                builder.addCommand(verifyCentralBankFeesTXCommand);
+
+
+            }
+
+
+
             builder.addOutputState(output4);
 
             builder.addCommand(verifyOwnerRestMonneyTransactionCommand);
             builder.addCommand(verifyTransactionCommand);
-            builder.addCommand(verifyCentralBankFeesTXCommand);
             builder.addCommand(verifyAppFeesTXCommand);
             // Verifier si la transaction est valide.
             builder.verify(getServiceHub());
             // signer la transaction par owner kypaire.
             final SignedTransaction signedTx = getServiceHub().signInitialTransaction(builder);
+            if (receiverObjet instanceof CommercialBank /*|| receiverObjet instanceof CentralBank*/){
+                // tx sur le meme noeud => pas besoin d'ouvrire une session
+
+                subFlow(new FinalityFlow(signedTx));
+                //subFlow(new FinalityFlow(fullySignedTx, Arrays.asList(otherPartySession)));
+                return output1.getTransactionInterBank();
+            }
+
             //initier le canal de communication entre initiateur et le recepteur de la TX
             FlowSession otherPartySession = initiateFlow(receiverNode);
             //collecter toute les signatures
@@ -425,7 +474,7 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
                 return null;
             }
 
-            if(((CentralBank) sender).getCentralBankData().getPays().equals(transactionInterBanks.getPays())){
+            if(((CentralBank) sender).getCentralBankData().getPays().equalsIgnoreCase(transactionInterBanks.getPays())){
                 /*
                 transaction local
                 lire la politique:
@@ -446,9 +495,12 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
 
                 */
 
-                regulateurDevise = CommonTreatment.getRegulateurDevise(((CommercialBank) sender).getCommercialBankData().getPays(), transactionInterBanks.getNameDevise(), getServiceHub());
+                regulateurDevise = CommonTreatment.getRegulateurDevise(((CentralBank) sender).getCentralBankData().getPays(), transactionInterBanks.getNameDevise(), getServiceHub());
+                System.out.println("regulateurDevise \n"+regulateurDevise);
                 montantConvertiDevise = convertisseurDevise(transactionInterBanks.getAmountToTransfert(), regulateurDevise.getTauxAchat());
+                System.out.println("montantConvertiDevise \n"+montantConvertiDevise);
             }
+
             double montantParDefautDansCompte = preparateurMontantDeReserveObligatoir(transactionInterBanks.getCurrentAmount(),
                     regulateurMasseMonnetaire.getTauxReserveObligatoir());
 
@@ -456,6 +508,7 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
 
             //preparation de la transaction
             // Cas de la TX de mise à jour du compte initiateur de la TX
+            System.out.println("transactionInterBank\n"+transactionInterBank);
             TransactionInterBanks newTransactionOutput1 = new TransactionInterBanks();
             newTransactionOutput1.setMotifTransaction(transactionInterBanks.getMotifTransaction());
             newTransactionOutput1.setAccountSender(transactionInterBanks.getAccountSender());
@@ -470,6 +523,7 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
                     (transactionInterBanks.getAmountToTransfert() + transactionInterBank.getAppFees()));
             newTransactionOutput1.setNameDevise(transactionInterBanks.getNameDevise());
             newTransactionOutput1.setAppFees(transactionInterBanks.getAppFees());
+
 
             // cas du transfert d'orignine engagé
             if (receiverObjet instanceof CommercialBank){
@@ -605,6 +659,15 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
             builder.verify(getServiceHub());
             // signer la transaction par owner kypaire.
             final SignedTransaction signedTx = getServiceHub().signInitialTransaction(builder);
+
+            if (receiverObjet instanceof CentralBank){
+                // tx sur le meme noeud => pas besoin d'ouvrire une session
+
+                subFlow(new FinalityFlow(signedTx));
+                //subFlow(new FinalityFlow(fullySignedTx, Arrays.asList(otherPartySession)));
+                return output1.getTransactionInterBank();
+            }
+
             //initier le canal de communication entre initiateur et le recepteur de la TX
             FlowSession otherPartySession = initiateFlow(receiverNode);
             //collecter toute les signatures
@@ -621,36 +684,50 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
             if (account.endsWith("bc")) {
                 List<StateAndRef<CentralBankState>> stateAndRefList =
                         getServiceHub().getVaultService().queryBy(CentralBankState.class).getStates();
+                if (stateAndRefList == null){
+                    return null;
+                }
                 CentralBank centralBank = null;
                 for (int i = 0; i < stateAndRefList.size(); i++) {
-                    CentralBank centralBank1 = stateAndRefList.get(i).getState().getData().getCentralBank();
-                    for (int j = 0; j < centralBank1.getCentralBankAccount().size(); j++) {
-                        CentralBankAccount centralBankAccount1 = centralBank1.getCentralBankAccount().get(j);
-                        if (centralBankAccount1.getAccountId().equals(account) &&
-                                centralBankAccount1.getPassword().equals(password)) {
-                            centralBank = new CentralBank();
-                            centralBank.setCentralBankData(centralBank1.getCentralBankData());
-                            centralBank.getCentralBankAccount().add(centralBankAccount1);
+                    if (stateAndRefList.get(i) != null && stateAndRefList.get(i).getState() != null && stateAndRefList.get(i).getState().getData() != null
+                    && stateAndRefList.get(i).getState().getData().getCentralBank() != null){
+                        CentralBank centralBank1 = stateAndRefList.get(i).getState().getData().getCentralBank();
+                        for (int j = 0; j < centralBank1.getCentralBankAccount().size(); j++) {
+                            CentralBankAccount centralBankAccount1 = centralBank1.getCentralBankAccount().get(j);
+                            if (centralBankAccount1.getAccountId().equals(account) &&
+                                    centralBankAccount1.getPassword().equals(password)) {
+                                centralBank = new CentralBank();
+                                centralBank.setCentralBankData(centralBank1.getCentralBankData());
+                                centralBank.getCentralBankAccount().add(centralBankAccount1);
+                            }
                         }
                     }
+
                 }
                 return centralBank;
             } else if (account.endsWith("cb")) {
                 //si c'est un commercial bank
                 List<StateAndRef<CommercialBankState>> stateAndRefList =
                         getServiceHub().getVaultService().queryBy(CommercialBankState.class).getStates();
+                if (stateAndRefList == null ){
+                    return null;
+                }
                 CommercialBank commercialBankralBank = null;
                 for (int i = 0; i < stateAndRefList.size(); i++) {
-                    CommercialBank commercialBank = stateAndRefList.get(i).getState().getData().getCommercialBank();
-                    for (int j = 0; j < commercialBank.getCommercialBankAccounts().size(); j++) {
-                        CommercialBankAccount commercialBankAccount = commercialBank.getCommercialBankAccounts().get(j);
-                        if (commercialBankAccount.getAccountId().equals(account) &&
-                                commercialBankAccount.getPassword().equals(password)) {
-                            commercialBankralBank = new CommercialBank();
-                            commercialBankralBank.setCommercialBankData(commercialBank.getCommercialBankData());
-                            commercialBankralBank.getCommercialBankAccounts().add(commercialBankAccount);
+                    if (stateAndRefList.get(i) != null && stateAndRefList.get(i).getState() != null && stateAndRefList.get(i).getState().getData() != null
+                    && stateAndRefList.get(i).getState().getData().getCommercialBank() != null){
+                        CommercialBank commercialBank = stateAndRefList.get(i).getState().getData().getCommercialBank();
+                        for (int j = 0; j < commercialBank.getCommercialBankAccounts().size(); j++) {
+                            CommercialBankAccount commercialBankAccount = commercialBank.getCommercialBankAccounts().get(j);
+                            if (commercialBankAccount.getAccountId().equals(account) &&
+                                    commercialBankAccount.getPassword().equals(password)) {
+                                commercialBankralBank = new CommercialBank();
+                                commercialBankralBank.setCommercialBankData(commercialBank.getCommercialBankData());
+                                commercialBankralBank.getCommercialBankAccounts().add(commercialBankAccount);
+                            }
                         }
                     }
+
                 }
                 return commercialBankralBank;
             } else {
@@ -660,34 +737,48 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
             if (account.endsWith("bc")) {
                 List<StateAndRef<CentralBankState>> stateAndRefList =
                         getServiceHub().getVaultService().queryBy(CentralBankState.class).getStates();
+                if (stateAndRefList == null ){
+                    return null;
+                }
                 CentralBank centralBank = null;
                 for (int i = 0; i < stateAndRefList.size(); i++) {
-                    CentralBank centralBank1 = stateAndRefList.get(i).getState().getData().getCentralBank();
-                    for (int j = 0; j < centralBank1.getCentralBankAccount().size(); j++) {
-                        CentralBankAccount centralBankAccount1 = centralBank1.getCentralBankAccount().get(j);
-                        if (centralBankAccount1.getAccountId().equals(account)) {
-                            centralBank = new CentralBank();
-                            centralBank.setCentralBankData(centralBank1.getCentralBankData());
-                            centralBank.getCentralBankAccount().add(centralBankAccount1);
+                    if (stateAndRefList.get(i) != null && stateAndRefList.get(i).getState() != null && stateAndRefList.get(i).getState().getData() != null
+                    && stateAndRefList.get(i).getState().getData().getCentralBank() != null){
+                        CentralBank centralBank1 = stateAndRefList.get(i).getState().getData().getCentralBank();
+                        for (int j = 0; j < centralBank1.getCentralBankAccount().size(); j++) {
+                            CentralBankAccount centralBankAccount1 = centralBank1.getCentralBankAccount().get(j);
+                            if (centralBankAccount1.getAccountId().equals(account)) {
+                                centralBank = new CentralBank();
+                                centralBank.setCentralBankData(centralBank1.getCentralBankData());
+                                centralBank.getCentralBankAccount().add(centralBankAccount1);
+                            }
                         }
                     }
+
                 }
                 return centralBank;
             } else if (account.endsWith("cb")) {
                 //si c'est un commercial bank
                 List<StateAndRef<CommercialBankState>> stateAndRefList =
                         getServiceHub().getVaultService().queryBy(CommercialBankState.class).getStates();
+                if (stateAndRefList == null){
+                    return null;
+                }
                 CommercialBank commercialBankralBank = null;
                 for (int i = 0; i < stateAndRefList.size(); i++) {
-                    CommercialBank commercialBank = stateAndRefList.get(i).getState().getData().getCommercialBank();
-                    for (int j = 0; j < commercialBank.getCommercialBankAccounts().size(); j++) {
-                        CommercialBankAccount commercialBankAccount = commercialBank.getCommercialBankAccounts().get(j);
-                        if (commercialBankAccount.getAccountId().equals(account)) {
-                            commercialBankralBank = new CommercialBank();
-                            commercialBankralBank.setCommercialBankData(commercialBank.getCommercialBankData());
-                            commercialBankralBank.getCommercialBankAccounts().add(commercialBankAccount);
+                    if (stateAndRefList.get(i) != null && stateAndRefList.get(i).getState() != null && stateAndRefList.get(i).getState().getData() != null
+                    && stateAndRefList.get(i).getState().getData().getCommercialBank() != null){
+                        CommercialBank commercialBank = stateAndRefList.get(i).getState().getData().getCommercialBank();
+                        for (int j = 0; j < commercialBank.getCommercialBankAccounts().size(); j++) {
+                            CommercialBankAccount commercialBankAccount = commercialBank.getCommercialBankAccounts().get(j);
+                            if (commercialBankAccount.getAccountId().equals(account)) {
+                                commercialBankralBank = new CommercialBank();
+                                commercialBankralBank.setCommercialBankData(commercialBank.getCommercialBankData());
+                                commercialBankralBank.getCommercialBankAccounts().add(commercialBankAccount);
+                            }
                         }
                     }
+
                 }
                 return commercialBankralBank;
             } else {
@@ -709,4 +800,20 @@ public class TransactionInterBanksFlowInitiator extends FlowLogic<TransactionInt
     private double preparateurMontantDeReserveObligatoir(double montantCourant, double tauxReserveObligatoir){
         return montantCourant*(tauxReserveObligatoir / 100);
     }
-}
+
+    private RegulateurMasseMonnetaire getMasseMonetaire(String pays){
+        List<StateAndRef<RegulateurMasseMonnetaireStates>> allTxInterbank =
+                getServiceHub().getVaultService().queryBy(RegulateurMasseMonnetaireStates.class).getStates();
+
+        List<RegulateurMasseMonnetaire> filtered = new ArrayList<>();
+        for (StateAndRef<RegulateurMasseMonnetaireStates> txInterbank : allTxInterbank){
+            RegulateurMasseMonnetaireStates states = txInterbank.getState().getData();
+            if (states.getRegulateurMasseMonnetaire().getPays().equalsIgnoreCase(pays)){
+                filtered.add(txInterbank.getState().getData().getRegulateurMasseMonnetaire());
+            }
+        }
+        RegulateurMasseMonnetaire reg = filtered.get(filtered.size()-1);
+        return reg;
+
+    }
+    }

@@ -118,17 +118,24 @@ public class EmissionCBDCFlowInitiator extends FlowLogic<TransactionInterBanks> 
                 if (account.endsWith("bc")) {
                     List<StateAndRef<CentralBankState>> stateAndRefList =
                             getServiceHub().getVaultService().queryBy(CentralBankState.class).getStates();
+                    if (stateAndRefList == null){
+                        return null;
+                    }
                     CentralBank centralBank = null;
                     for (int i = 0; i < stateAndRefList.size(); i++) {
-                        CentralBank centralBank1 = stateAndRefList.get(i).getState().getData().getCentralBank();
-                        for (int j = 0; j < centralBank1.getCentralBankAccount().size(); j++) {
-                            CentralBankAccount centralBankAccount1 = centralBank1.getCentralBankAccount().get(j);
-                            if (centralBankAccount1.getAccountId().equals(account) &&
-                                    centralBankAccount1.getPassword().equals(password)) {
-                                centralBank = new CentralBank();
-                                centralBank.setCentralBankData(centralBank1.getCentralBankData());
-                                centralBank.getCentralBankAccount().add(centralBankAccount1);
-                            }
+                        if (stateAndRefList.get(i) != null && stateAndRefList.get(i).getState() != null && stateAndRefList.get(i).getState().getData() != null
+                        && stateAndRefList.get(i).getState().getData().getCentralBank() != null){
+                            CentralBank centralBank1 = stateAndRefList.get(i).getState().getData().getCentralBank();
+                            for (int j = 0; j < centralBank1.getCentralBankAccount().size(); j++) {
+                                CentralBankAccount centralBankAccount1 = centralBank1.getCentralBankAccount().get(j);
+                                if (centralBankAccount1.getAccountId().equals(account) &&
+                                        centralBankAccount1.getPassword().equals(password)) {
+                                    centralBank = new CentralBank();
+                                    centralBank.setCentralBankData(centralBank1.getCentralBankData());
+                                    centralBank.getCentralBankAccount().add(centralBankAccount1);
+                                }
+                        }
+
                         }
                     }
                     return centralBank;
@@ -139,17 +146,24 @@ public class EmissionCBDCFlowInitiator extends FlowLogic<TransactionInterBanks> 
                 if (account.endsWith("bc")) {
                     List<StateAndRef<CentralBankState>> stateAndRefList =
                             getServiceHub().getVaultService().queryBy(CentralBankState.class).getStates();
+                    if (stateAndRefList == null ){
+                        return null;
+                    }
                     CentralBank centralBank = null;
                     for (int i = 0; i < stateAndRefList.size(); i++) {
-                        CentralBank centralBank1 = stateAndRefList.get(i).getState().getData().getCentralBank();
-                        for (int j = 0; j < centralBank1.getCentralBankAccount().size(); j++) {
-                            CentralBankAccount centralBankAccount1 = centralBank1.getCentralBankAccount().get(j);
-                            if (centralBankAccount1.getAccountId().equals(account)) {
-                                centralBank = new CentralBank();
-                                centralBank.setCentralBankData(centralBank1.getCentralBankData());
-                                centralBank.getCentralBankAccount().add(centralBankAccount1);
+                        if (stateAndRefList.get(i) != null && stateAndRefList.get(i).getState() != null && stateAndRefList.get(i).getState().getData() != null
+                                && stateAndRefList.get(i).getState().getData().getCentralBank() != null){
+                            CentralBank centralBank1 = stateAndRefList.get(i).getState().getData().getCentralBank();
+                            for (int j = 0; j < centralBank1.getCentralBankAccount().size(); j++) {
+                                CentralBankAccount centralBankAccount1 = centralBank1.getCentralBankAccount().get(j);
+                                if (centralBankAccount1.getAccountId().equals(account)) {
+                                    centralBank = new CentralBank();
+                                    centralBank.setCentralBankData(centralBank1.getCentralBankData());
+                                    centralBank.getCentralBankAccount().add(centralBankAccount1);
+                                }
                             }
                         }
+
                     }
                     return centralBank;
                 }
@@ -166,24 +180,31 @@ public class EmissionCBDCFlowInitiator extends FlowLogic<TransactionInterBanks> 
             // Création de CBDC ( S'auto-alimenter)
             TransactionInterBanks transactionBanks1 = null;
             for (int i = 1; i < stateAndRefList.size(); i++){
-                if(stateAndRefList.get(i).getState().getData().getTransactionInterBank().getPays().equals(pays) &&
-                        stateAndRefList.get(i).getState().getData().getTransactionInterBank().getAccountSender().equals(account) &&
-                        stateAndRefList.get(i).getState().getData().getTransactionInterBank().getAccountReceiver().equals(account)) {
+                if (stateAndRefList.get(i) != null && stateAndRefList.get(i).getState() != null && stateAndRefList.get(i).getState().getData() != null
+                        && stateAndRefList.get(i).getState().getData().getTransactionInterBank() != null){
+                    if(stateAndRefList.get(i).getState().getData().getTransactionInterBank().getPays().equals(pays) &&
+                            stateAndRefList.get(i).getState().getData().getTransactionInterBank().getAccountSender().equals(account) &&
+                            stateAndRefList.get(i).getState().getData().getTransactionInterBank().getAccountReceiver().equals(account)) {
 
-                    transactionBanks1 = stateAndRefList.get(i).getState().getData().getTransactionInterBank();
+                        transactionBanks1 = stateAndRefList.get(i).getState().getData().getTransactionInterBank();
 
+                    }
                 }
+
             }
 
             // Recevoir des transfert d'autre compte
             TransactionInterBanks transactionBanks2 = null;
             for (int i = 1; i < stateAndRefList.size(); i++){
-                if(stateAndRefList.get(i).getState().getData().getTransactionInterBank().getPays().equals(pays) &&
-                        ! stateAndRefList.get(i).getState().getData().getTransactionInterBank().getAccountSender().equals(account) &&
-                         stateAndRefList.get(i).getState().getData().getTransactionInterBank().getAccountReceiver().equals(account)) {
+                if (stateAndRefList.get(i) != null && stateAndRefList.get(i).getState() != null && stateAndRefList.get(i).getState().getData() != null
+                        && stateAndRefList.get(i).getState().getData().getTransactionInterBank() != null) {
+                    if (stateAndRefList.get(i).getState().getData().getTransactionInterBank().getPays().equals(pays) &&
+                            !stateAndRefList.get(i).getState().getData().getTransactionInterBank().getAccountSender().equals(account) &&
+                            stateAndRefList.get(i).getState().getData().getTransactionInterBank().getAccountReceiver().equals(account)) {
 
-                    transactionBanks2 = stateAndRefList.get(i).getState().getData().getTransactionInterBank();
+                        transactionBanks2 = stateAndRefList.get(i).getState().getData().getTransactionInterBank();
 
+                    }
                 }
             }
 

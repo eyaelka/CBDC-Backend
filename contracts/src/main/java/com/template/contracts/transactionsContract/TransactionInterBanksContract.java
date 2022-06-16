@@ -196,39 +196,45 @@ public class TransactionInterBanksContract implements Contract {
     }
 
     private void verifyAppFees(@NotNull LedgerTransaction tx, @NotNull List<PublicKey> requiredSigners){
-        TransactionInterBanksStates output4;
-        if (tx.getOutputs().size() == 3){
-            output4 = tx.outputsOfType(TransactionInterBanksStates.class).get(2);
+        System.out.println(tx.getOutputs().get(0));
+        System.out.println(tx.getOutputs().get(1));
+        System.out.println(tx.getOutputs().get(2));
 
-        }else{
-             output4 = tx.outputsOfType(TransactionInterBanksStates.class).get(3);
 
-        }
-        if (output4 == null || output4.getTransactionInterBank()==null){
-            throw new IllegalArgumentException("Output lié à la banque de tutelle est null");
-        }
-//        if (! requiredSigners.containsAll(output4.getParticipants())){
-//            throw new IllegalArgumentException("signature manquante");
+//        TransactionInterBanksStates output4;
+//        if (tx.getOutputs().size() == 3){
+//            output4 = tx.outputsOfType(TransactionInterBanksStates.class).get(2);
+//
+//        }else{
+//             output4 = tx.outputsOfType(TransactionInterBanksStates.class).get(3);
+//
 //        }
-        TransactionInterBanks transactionInterBank = output4.getTransactionInterBank();
-        if (transactionInterBank.getAccountSender() == null){
-            throw new IllegalArgumentException("sender account est null");
-        }
-        if (transactionInterBank.getMotifTransaction() == null){
-            throw new IllegalArgumentException("Moditif est null");
-        }
-        if (transactionInterBank.getDate() == null){
-            throw new IllegalArgumentException("Date du transfert est null");
-        }
-        if (transactionInterBank.getPays() == null){
-            throw new IllegalArgumentException("Pays receiver est null");
-        }
-        if (transactionInterBank.getAppFees() <= 0){
-            throw new IllegalArgumentException("Les frais de l'app sont <= 0");
-        }
-        if (transactionInterBank.getAccountReceiver() == null){
-            throw new IllegalArgumentException("Le compte recepteur des frais de l'app est null ");
-        }
+//        System.out.println("output4\n"+output4);
+//        if (output4 == null || output4.getTransactionInterBank()==null){
+//            throw new IllegalArgumentException("Output lié à la banque de tutelle est null");
+//        }
+////        if (! requiredSigners.containsAll(output4.getParticipants())){
+////            throw new IllegalArgumentException("signature manquante");
+////        }
+//        TransactionInterBanks transactionInterBank = output4.getTransactionInterBank();
+//        if (transactionInterBank.getAccountSender() == null){
+//            throw new IllegalArgumentException("sender account est null");
+//        }
+//        if (transactionInterBank.getMotifTransaction() == null){
+//            throw new IllegalArgumentException("Moditif est null");
+//        }
+//        if (transactionInterBank.getDate() == null){
+//            throw new IllegalArgumentException("Date du transfert est null");
+//        }
+//        if (transactionInterBank.getPays() == null){
+//            throw new IllegalArgumentException("Pays receiver est null");
+//        }
+//        if (transactionInterBank.getAppFees() <= 0){
+//            throw new IllegalArgumentException("Les frais de l'app sont <= 0");
+//        }
+//        if (transactionInterBank.getAccountReceiver() == null){
+//            throw new IllegalArgumentException("Le compte recepteur des frais de l'app est null ");
+//        }
     }
 
     private void createurCBDC(@NotNull LedgerTransaction tx, @NotNull List<PublicKey> requiredSigners){

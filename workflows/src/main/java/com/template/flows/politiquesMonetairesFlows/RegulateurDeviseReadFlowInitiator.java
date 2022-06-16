@@ -1,6 +1,7 @@
 package com.template.flows.politiquesMonetairesFlows;
 
 import co.paralleluniverse.fibers.Suspendable;
+import com.template.flows.model.CommonTreatment;
 import com.template.model.politiquesMonetaires.RegulateurDevise;
 import com.template.model.politiquesMonetaires.RegulateurMasseMonnetaire;
 import com.template.states.politiquesMonetairesStates.RegulateurDeviseStates;
@@ -11,6 +12,7 @@ import net.corda.core.flows.FlowException;
 import net.corda.core.flows.FlowLogic;
 import net.corda.core.flows.InitiatingFlow;
 import net.corda.core.flows.StartableByRPC;
+import net.corda.core.node.services.Vault;
 import net.corda.core.utilities.ProgressTracker;
 
 import java.util.ArrayList;
@@ -21,7 +23,7 @@ import java.util.stream.Stream;
 
 @InitiatingFlow
 @StartableByRPC
-public class RegulateurDeviseReadFlowInitiator extends FlowLogic<RegulateurDevise> {
+public class RegulateurDeviseReadFlowInitiator extends FlowLogic<List<RegulateurDevise>> {
 
     private final String pays;
     private final ProgressTracker progressTracker = new ProgressTracker();
@@ -37,56 +39,64 @@ public class RegulateurDeviseReadFlowInitiator extends FlowLogic<RegulateurDevis
 
     @Suspendable
     @Override
-    public RegulateurDevise call() throws FlowException {
-
-//        List<StateAndRef<RegulateurDeviseStates>> stateAndRefList =
-//                getServiceHub().getVaultService().queryBy(RegulateurDeviseStates.class).getStates();
-//        return stateAndRefList.get(stateAndRefList.size()-1).getState().getData().getRegulateurDevise();
+    public List<RegulateurDevise> call() throws FlowException {
 
 
         List<StateAndRef<RegulateurDeviseStates>> allTxLocal =
                 getServiceHub().getVaultService().queryBy(RegulateurDeviseStates.class).getStates();
         List<RegulateurDevise> filtered = new ArrayList<>();
-        for (StateAndRef<RegulateurDeviseStates> regulateurDevise : allTxLocal){
-            RegulateurDeviseStates states = regulateurDevise.getState().getData();
-            if (states.getRegulateurDevise().getPays().equalsIgnoreCase(pays)){
-                filtered.add(regulateurDevise.getState().getData().getRegulateurDevise());
+        if (allTxLocal == null ){
+            return null;
+        }
+        for (StateAndRef<RegulateurDeviseStates> reg : allTxLocal){
+            if (reg.getState() != null && reg.getState().getData() != null && reg.getState().getData().getRegulateurDevise()!= null){
+                RegulateurDeviseStates state = reg.getState().getData();
+                if (state.getRegulateurDevise().getPays().equals(pays)) {
+                    RegulateurDevise regulation = ifExist(filtered, reg.getState().getData().getRegulateurDevise());
+                    if ( regulation == null ){
+                        filtered.add(reg.getState().getData().getRegulateurDevise());
+                    }else{
+                        if (CommonTreatment.stringCompare(regulation.getDate(),reg.getState().getData().getRegulateurDevise().getDate()) <= 0){
+                            filtered = deleteOldRegulation(filtered,reg.getState().getData().getRegulateurDevise());
+
+                        }
+
+                    }
+                }
+            }
+
+        }
+        System.out.println("filtered \n"+filtered);
+        return filtered;
+    }
+
+
+    public RegulateurDevise ifExist(List<RegulateurDevise> list , RegulateurDevise reg){
+
+        if (list != null){
+            for (int i =0; i<= list.size()-1; i++){
+                if (list.get(i).getNom().equalsIgnoreCase(reg.getNom())){
+                    return reg;
+                }
             }
         }
-        return filtered.get(filtered.size()-1);
+        return null;
+    }
 
+    public List<RegulateurDevise> deleteOldRegulation (List<RegulateurDevise> listReg, RegulateurDevise reg){
+        List<RegulateurDevise> temp = new ArrayList<>();
+        if (listReg != null ) {
+            for (int i = 0 ; i<= listReg.size()-1; i++){
+                if ( ! listReg.get(i).getNom().equalsIgnoreCase(reg.getNom())){
+                    temp.add(listReg.get(i));
+                }
+            }
+            temp.add(reg);
+            return temp;
 
+        }
 
-//////////////////////
-//        List<StateAndRef<RegulateurDeviseStates>> stateAndRefList =
-//                getServiceHub().getVaultService().queryBy(RegulateurDeviseStates.class).getStates();
-//        //AtomicReference<RegulateurDevise> regulateurDeviseStatesToReturn = null;
-//        ///////////////////
-//
-//        Stream<StateAndRef<RegulateurDeviseStates>> regulateurDeviseStates =
-//                stateAndRefList.stream().filter(
-//                        regulateurDeviseState1 -> regulateurDeviseState1.
-//                                getState().getData().getRegulateurDevise().getPays().equals(pays));
-//        System.out.println(regulateurDeviseStates);
-//
-//        List<StateAndRef<RegulateurDeviseStates>> regulateurDeviseState =
-//                regulateurDeviseStates.collect(Collectors.toList());
-//        System.out.println(regulateurDeviseState);
-//        return  regulateurDeviseState.get(0).getState().getData().getRegulateurDevise();
-//
-//        //////////////////////
-////        stateAndRefList.forEach(deviseStatesStateAndRef -> {
-////            RegulateurDevise regulateurDevise =
-////                    deviseStatesStateAndRef.getState().getData().getRegulateurDevise();
-////            System.out.println(regulateurDevise);
-////            if (regulateurDevise.getPays().equals(pays)){
-////                System.out.println("je suis dans if");
-////                regulateurDeviseStatesToReturn.set(regulateurDevise);
-////                System.out.println(regulateurDeviseStatesToReturn.get());
-////            }
-////        });
-////        System.out.println(regulateurDeviseStatesToReturn.get());
-////        return regulateurDeviseStatesToReturn.get();
+        return null;
     }
 }
 

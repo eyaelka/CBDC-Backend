@@ -6,11 +6,13 @@ import com.template.flows.model.CentralBankAccountInfo;
 import com.template.flows.model.NewCentralBankAccount;
 import com.template.flows.model.TransactionInterbancaire;
 import com.template.flows.politiquesMonetairesFlows.*;
+import com.template.flows.transactionsFlow.AllSentRecievedBalanceFlowInitiator;
 import com.template.flows.transactionsFlow.EmissionCBDCFlowInitiator;
 import com.template.flows.transactionsFlow.TransactionInterBanksFlowInitiator;
 import com.template.model.centralBank.CentralBank;
 import com.template.model.centralBank.CentralBankData;
 import com.template.model.commercialBank.CommercialBank;
+import com.template.model.commercialBank.CommercialBankAccount;
 import com.template.model.politiquesMonetaires.RegulateurDevise;
 import com.template.model.politiquesMonetaires.RegulateurMasseMonnetaire;
 import com.template.model.politiquesMonetaires.RegulateurTransactionInterPays;
@@ -18,6 +20,7 @@ import com.template.model.politiquesMonetaires.RegulateurTransactionLocale;
 import com.template.model.transactions.TransactionInterBanks;
 import com.template.states.centralBanqueStates.CentralBankState;
 import com.template.states.commercialBankStates.CommercialBankState;
+import com.template.states.politiquesMonetairesStates.RegulateurDeviseStates;
 import com.template.states.transactionsStates.TransactionInterBanksStates;
 import com.template.webserver.NodeRPCConnection;
 import com.template.webserver.emailSender.EmailFromTo;
@@ -28,10 +31,12 @@ import net.corda.core.contracts.StateAndRef;
 import net.corda.core.node.services.Vault;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
+import java.text.ParseException;
+import java.util.*;
 
 @Service
 @Transactional
@@ -48,7 +53,7 @@ public class CentralBankInterfaceImp implements CentralBankInterface {
                     CentralBankCreatorFlowInitiator.class,centralBankAccountInfo).getReturnValue().get();
 
             if (compteIdAndPassword != null){
-
+                System.out.println(compteIdAndPassword);
                 CentralBankData appCompteData = new CentralBankData();
                 appCompteData.setNom("appcompte");
                 appCompteData.setEmail(centralBankAccountInfo.getCentralBankData().getEmail());
@@ -63,7 +68,7 @@ public class CentralBankInterfaceImp implements CentralBankInterface {
                 //envoyer le mail de creation
                     EmailFromTo emailFromTo = new EmailFromTo();
                     emailFromTo.setEmailFrom("cbdc.talan@gmail.com");
-                    emailFromTo.setEmailFromPassWord("cbdctalan2022");
+                    emailFromTo.setEmailFromPassWord("iwlwwcodmacansfn\n");
                     emailFromTo.setEmailReceiver(centralBankAccountInfo.getCentralBankData().getEmail());
                     emailFromTo.setEmailSubject("Création de compte dans le système");
 
@@ -86,7 +91,8 @@ public class CentralBankInterfaceImp implements CentralBankInterface {
             return null;
 
         }catch (Exception exception){
-            return null;
+        exception.printStackTrace();
+        return null;
         }
     }
 
@@ -102,7 +108,7 @@ public class CentralBankInterfaceImp implements CentralBankInterface {
                 //envoyer le mail de creation
                 EmailFromTo emailFromTo = new EmailFromTo();
                 emailFromTo.setEmailFrom("cbdc.talan@gmail.com");
-                emailFromTo.setEmailFromPassWord("cbdctalan2022");
+                emailFromTo.setEmailFromPassWord("iwlwwcodmacansfn\n");
                 emailFromTo.setEmailReceiver(newCentralBankAccount.getCentralBankEmail());
                 emailFromTo.setEmailSubject("Création d'un autre compte dans le système");
 
@@ -141,7 +147,7 @@ public class CentralBankInterfaceImp implements CentralBankInterface {
                 //envoyer le mail de creation
                 EmailFromTo emailFromTo = new EmailFromTo();
                 emailFromTo.setEmailFrom("cbdc.talan@gmail.com");
-                emailFromTo.setEmailFromPassWord("cbdctalan2022");
+                emailFromTo.setEmailFromPassWord("iwlwwcodmacansfn\n");
                 emailFromTo.setEmailReceiver(banqueCentrale.getEmail());
                 emailFromTo.setEmailSubject("Mise à jour de vos données");
 
@@ -176,7 +182,7 @@ public class CentralBankInterfaceImp implements CentralBankInterface {
                 //envoyer le mail de creation
                 EmailFromTo emailFromTo = new EmailFromTo();
                 emailFromTo.setEmailFrom("cbdc.talan@gmail.com");
-                emailFromTo.setEmailFromPassWord("cbdctalan2022");
+                emailFromTo.setEmailFromPassWord("iwlwwcodmacansfn\n");
                 emailFromTo.setEmailReceiver(suspendCentralBankEmail);
 
                 String activeOrDesactiveOrSwithAccountType;
@@ -231,7 +237,7 @@ public class CentralBankInterfaceImp implements CentralBankInterface {
                 //envoyer le mail de creation
                 EmailFromTo emailFromTo = new EmailFromTo();
                 emailFromTo.setEmailFrom("cbdc.talan@gmail.com");
-                emailFromTo.setEmailFromPassWord("cbdctalan2022");
+                emailFromTo.setEmailFromPassWord("iwlwwcodmacansfn\n");
                 emailFromTo.setEmailReceiver(centralBankAccountInfo.getCentralBankData().getEmail());
                 emailFromTo.setEmailSubject("Compte Super Admin");
 
@@ -242,10 +248,12 @@ public class CentralBankInterfaceImp implements CentralBankInterface {
                 emailFromTo.setEmailContent(content);
 
                 //send email now
+
                 new EmailSender(emailFromTo).sendmail();
             }
                 return compteIdAndPassword;
             }catch (Exception exception){
+            exception.printStackTrace();
             return null;
         }
     }
@@ -289,10 +297,11 @@ public class CentralBankInterfaceImp implements CentralBankInterface {
     }
 
     @Override
-    public RegulateurDevise getLastRegulattionDevise(String pays) {
+    public  List<RegulateurDevise> getLastRegulattionDevise(String pays) {
         try{
-            RegulateurDevise regulateurDevise = nodeRPCConnection.proxy.startTrackedFlowDynamic(
+            List<RegulateurDevise> regulateurDevise = nodeRPCConnection.proxy.startTrackedFlowDynamic(
                     RegulateurDeviseReadFlowInitiator.class, pays).getReturnValue().get();
+            System.out.println(regulateurDevise);
             return regulateurDevise;
         }catch (Exception e){
             e.printStackTrace();
@@ -389,17 +398,65 @@ public class CentralBankInterfaceImp implements CentralBankInterface {
         public List<CommercialBank> getAllCommercialBanks(){
             Vault.Page<CommercialBankState> vaultStates = nodeRPCConnection.proxy.vaultQuery(CommercialBankState.class);
             List<StateAndRef<CommercialBankState>> allCommercialBanks = vaultStates.getStates();
+            if(allCommercialBanks == null){
+                return null;
+            }
             List<CommercialBank> banks = new ArrayList<>();
             for (StateAndRef<CommercialBankState> commercialbank : allCommercialBanks){
-                banks.add(commercialbank.getState().getData().getCommercialBank());
+                if (commercialbank.getState() != null && commercialbank.getState().getData() != null && commercialbank.getState().getData().getCommercialBank() != null){
+                    if (ifExist(banks, commercialbank.getState().getData().getCommercialBank().getCommercialBankAccounts().get(0).getAccountId())==1){
+                        banks = deleteOldRegulation(banks, commercialbank.getState().getData().getCommercialBank());
+                    }else{
+                        banks.add(commercialbank.getState().getData().getCommercialBank());
+                    }
+                }
+
             }
+
             return banks;
             }
 
-    public Double getCurrentBalance(){
+            public int ifExist(List<CommercialBank> bankList ,String sender){
+                 if (bankList == null){
+                     return 0;
+                 }
+                for (CommercialBank commercialbank : bankList){
+                    for (CommercialBankAccount bankAccount : commercialbank.getCommercialBankAccounts()){
+                        if (bankAccount.getAccountId().equals(sender)){
+                            return 1;
+                        }
+                    }
+                }
+                return 0;
+            }
+
+    public List<CommercialBank> deleteOldRegulation (List<CommercialBank> bankList, CommercialBank bankCommercial){
+        List<CommercialBank> temp = new ArrayList<>();
+        if (bankList != null ) {
+            for (int i = 0 ; i<= bankList.size()-1; i++){
+                int val = 0;
+                for (CommercialBankAccount bankAccount : bankList.get(i).getCommercialBankAccounts()){
+                    if (bankAccount.getAccountId().equals(bankCommercial.getCommercialBankAccounts().get(0).getAccountId())){
+                    val = 1;
+                    }
+
+                }
+                if (val == 0){
+                    temp.add(bankList.get(i));
+                }
+            }
+            temp.add(bankCommercial);
+            return temp;
+
+        }
+
+        return null;
+    }
+
+    public Double getCurrentBalance(String sender){
         try {
             Double balance = nodeRPCConnection.proxy.startTrackedFlowDynamic(
-                    CurrentAmountCBDCReadFlowInitiator.class).getReturnValue().get();
+                    CurrentAmountCBDCReadFlowInitiator.class,sender).getReturnValue().get();
             return balance;
         }catch (Exception e){
             e.printStackTrace();
@@ -408,6 +465,85 @@ public class CentralBankInterfaceImp implements CentralBankInterface {
 
     }
 
+    public List<Double> getAllTx(String sender){
+        try {
+            List<Double> transactions = nodeRPCConnection.proxy.startTrackedFlowDynamic(
+                    CentralBankReadAllTxFlowInitiator.class,sender).getReturnValue().get();
+            return transactions;
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+        public List<Double> getAllAmountSentByCentralBank(String sender){
+        Vault.Page<TransactionInterBanksStates> vaultStates = nodeRPCConnection.proxy.vaultQuery(TransactionInterBanksStates.class);
+        List<StateAndRef<TransactionInterBanksStates>> allTxInterBanks = vaultStates.getStates();
+        List<Double> filtered = new ArrayList<>();
+        for (StateAndRef<TransactionInterBanksStates> txInterbank : allTxInterBanks){
+            TransactionInterBanksStates state = txInterbank.getState().getData();
+            if (state.getTransactionInterBank().getAccountSender().equals(sender)){
+                filtered.add(txInterbank.getState().getData().getTransactionInterBank().getAmountToTransfert());
+
+            }
+        }
+    return filtered;
+    }
+
+    public List<String> getAllDateByCentralBank(String sender){
+        Vault.Page<TransactionInterBanksStates> vaultStates = nodeRPCConnection.proxy.vaultQuery(TransactionInterBanksStates.class);
+        List<StateAndRef<TransactionInterBanksStates>> allTxInterBanks = vaultStates.getStates();
+        List<String> filtered = new ArrayList<>();
+        for (StateAndRef<TransactionInterBanksStates> txInterbank : allTxInterBanks){
+            TransactionInterBanksStates state = txInterbank.getState().getData();
+            if (state.getTransactionInterBank().getAccountSender().equals(sender)){
+                filtered.add(txInterbank.getState().getData().getTransactionInterBank().getDate());
+
+            }
+        }
+        return filtered;
+
+    }
+
+    public List<TransactionInterBanks> getAlltxByCentralBank(String sender){
+
+        try {
+            List<TransactionInterBanks> transactions = nodeRPCConnection.proxy.startTrackedFlowDynamic(
+                    CentralBankReadAllTxByCBFlowInitiator.class,sender).getReturnValue().get();
+            return transactions;
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+//        Vault.Page<TransactionInterBanksStates> vaultStates = nodeRPCConnection.proxy.vaultQuery(TransactionInterBanksStates.class);
+//        List<StateAndRef<TransactionInterBanksStates>> allTxInterBanks = vaultStates.getStates();
+//        List<TransactionInterBanks> filtered = new ArrayList<>();
+//        for (StateAndRef<TransactionInterBanksStates> txInterbank : allTxInterBanks){
+//            if (txInterbank != null && txInterbank.getState() != null && txInterbank.getState().getData() != null ){
+//                TransactionInterBanksStates state = txInterbank.getState().getData();
+//                System.out.println("state.getTransactionInterBank().getAccountSender()"+state.getTransactionInterBank().getAccountSender());
+//                if (state.getTransactionInterBank().getAccountSender().equals(sender) ){
+//                    filtered.add(state.getTransactionInterBank());
+//                }
+//            }
+//        }
+//        System.out.println(filtered);
+//        return filtered;
+
+    }
+
+    public List<Double> getUpdatesBalance( String sender){
+        try {
+            List<Double> balance = nodeRPCConnection.proxy.startTrackedFlowDynamic(
+                    AllSentRecievedBalanceFlowInitiator.class,sender).getReturnValue().get();
+            return balance;
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+
+    }
 
 
     }

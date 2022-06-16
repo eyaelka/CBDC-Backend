@@ -5,7 +5,10 @@ import java.util.Collection;
 import com.template.flows.centralBankFlows.LoadCentralBankByAccountIdFlowInitiator;
 import com.template.flows.commercialBankFlows.LoadCommercialBankByAccountIdFlowInitiator;
 import com.template.flows.model.AccountIdAndPassword;
+import com.template.model.centralBank.CentralBankData;
+import com.template.model.commercialBank.CommercialBankData;
 import com.template.webserver.NodeRPCConnection;
+import com.template.webserver.service.interfaces.CommercialBankInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,6 +27,9 @@ public class UserDetailsServiceImplementation implements UserDetailsService{
     private NodeRPCConnection nodeRPCConnection ;
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Autowired
+    CommercialBankInterface commercialBankInterface;
 
     @Override
 
@@ -47,7 +53,12 @@ public class UserDetailsServiceImplementation implements UserDetailsService{
                 throw new UsernameNotFoundException("Cette banque commerciale n'existe pas");
             //Preparer les roles de l sous forme de collection d'objets compressible par spring security
             Collection<GrantedAuthority> authorisations = new ArrayList<>();
+
+            CommercialBankData commercialbank =commercialBankInterface.getCommercialBankById(accountIdAndPassword.getCompteId());
+
             authorisations.add(new SimpleGrantedAuthority("commercialbank"));
+            authorisations.add(new SimpleGrantedAuthority(commercialbank.getPays()));
+
             String passwordEncoder = bCryptPasswordEncoder.encode(accountIdAndPassword.getPassword());
             return new User(accountIdAndPassword.getCompteId(), passwordEncoder, authorisations);
         }catch (Exception exception){

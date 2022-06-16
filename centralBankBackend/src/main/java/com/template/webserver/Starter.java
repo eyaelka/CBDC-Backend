@@ -65,7 +65,6 @@ public class Starter {
         centralBankAccountInfo.setSuspend(false);
         centralBankInterface.superAdmin(centralBankAccountInfo);
                 //////////////////
-        System.out.println(centralBankInterface.read("45584699bc"));
     }
 
 

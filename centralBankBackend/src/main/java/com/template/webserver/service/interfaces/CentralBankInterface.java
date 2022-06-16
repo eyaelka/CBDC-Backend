@@ -14,9 +14,12 @@ import com.template.model.transactions.TransactionInterBanks;
 import com.template.states.commercialBankStates.CommercialBankState;
 import com.template.webserver.model.SuspendOrActiveOrSwithAccountTypeModel;
 import net.corda.core.contracts.StateAndRef;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public interface CentralBankInterface {
 
@@ -34,7 +37,7 @@ public interface CentralBankInterface {
 
     //for devise
     RegulateurDevise defineDeviseRegulation(RegulateurDevise regulateurDevise);
-    RegulateurDevise getLastRegulattionDevise(String pays);
+    List<RegulateurDevise> getLastRegulattionDevise(String pays);
 
     //for transaction inter pays
     RegulateurTransactionInterPays defineTransactionInterPaysRegulation(RegulateurTransactionInterPays regulateurTransactionInterPays);
@@ -53,7 +56,18 @@ public interface CentralBankInterface {
 
     List<CommercialBank> getAllCommercialBanks();
 
-    Double getCurrentBalance();
+    Double getCurrentBalance(String sender);
+    List<Double> getAllAmountSentByCentralBank(String sender);
+
+    List<String> getAllDateByCentralBank(String sender);
+
+    List<TransactionInterBanks> getAlltxByCentralBank(String sender);
+
+    public List<Double> getAllTx(String sender);
+    public List<Double> getUpdatesBalance(String sender);
+
+
+
 
 
 

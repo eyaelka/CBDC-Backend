@@ -48,6 +48,8 @@ public class EndUserController {
     @ApiOperation(value = "Endpoint: /enduser/update met à jour un utilisateur final dans le réseau. Il retourne : un objet {AccountId, password } et null sinon.")
     @PostMapping("/enduser/update")
     public AccountIdAndPassword update(@RequestBody EndUserUpdateModel endUserUpdateModel) {
+        System.out.println("result \n"+endUserInterface.update(
+                endUserUpdateModel.getEndUserData(),endUserUpdateModel.getEndUserAccountId()));
         return endUserInterface.update(
                 endUserUpdateModel.getEndUserData(),endUserUpdateModel.getEndUserAccountId());
     }

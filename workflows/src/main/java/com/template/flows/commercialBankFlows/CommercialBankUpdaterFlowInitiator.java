@@ -9,6 +9,7 @@ import com.template.states.commercialBankStates.CommercialBankState;
 import net.corda.core.contracts.Command;
 import net.corda.core.contracts.UniqueIdentifier;
 import net.corda.core.flows.*;
+import net.corda.core.identity.CordaX500Name;
 import net.corda.core.identity.Party;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
@@ -40,6 +41,9 @@ public class CommercialBankUpdaterFlowInitiator extends FlowLogic<AccountIdAndPa
     public AccountIdAndPassword call() throws FlowException {
 
         List<SignedTransaction> signedTransactions = getServiceHub().getValidatedTransactions().track().getSnapshot();
+        if (signedTransactions == null){
+            return null;
+        }
 
         CommercialBank commercialBank = new CommercialBank();
         AccountIdAndPassword accountIdAndPassword = new AccountIdAndPassword();
@@ -55,8 +59,10 @@ public class CommercialBankUpdaterFlowInitiator extends FlowLogic<AccountIdAndPa
                         for (int j = 0; j < commercialBankState.getCommercialBank().getCommercialBankAccounts().size(); j++) {
                             if (commercialBankState.getCommercialBank().getCommercialBankAccounts().get(j).getAccountId().equals(commercialBankAccountId)) {
                                 commercialBank = commercialBankState.getCommercialBank();
-                                addedBy = commercialBankState.getAddedBy();
-                                owner = commercialBankState.getOwner();
+
+                                 addedBy = getOurIdentity();
+                                 owner = getServiceHub().getNetworkMapCache().getPeerByLegalName(new CordaX500Name("PartyA","London","GB"));
+
                                 accountIdAndPassword.setCompteId(commercialBankAccountId);
                                 accountIdAndPassword.setPassword(commercialBankState.getCommercialBank().getCommercialBankAccounts().get(j).getPassword());
                                 break;
@@ -65,6 +71,7 @@ public class CommercialBankUpdaterFlowInitiator extends FlowLogic<AccountIdAndPa
                     }
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 return null;
             }
         }

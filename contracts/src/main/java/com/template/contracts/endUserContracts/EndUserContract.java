@@ -88,9 +88,9 @@ public class EndUserContract implements Contract {
         if(endUserAccount.getCRUDDate()== null){
             throw new IllegalArgumentException("Date d'ouverture du compte est null!");
         }
-        if(!command.getSigners().containsAll(endUserState.getParticipants().stream().map(AbstractParty::getOwningKey).collect(Collectors.toList()))){
-            throw new IllegalArgumentException("bank Node Who wants to Add User et end User Node doivent signer");
-        }
+//        if(!command.getSigners().containsAll(endUserState.getParticipants().stream().map(AbstractParty::getOwningKey).collect(Collectors.toList()))){
+//            throw new IllegalArgumentException("bank Node Who wants to Add User et end User Node doivent signer");
+//        }
     }
     // Used to indicate the transaction's intent.
     public static class Create implements CommandData {

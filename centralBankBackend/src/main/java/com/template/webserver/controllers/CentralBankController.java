@@ -23,7 +23,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  *  Central bank API endpoints.
@@ -47,12 +49,12 @@ public class CentralBankController {
     @ApiOperation(value = "Endpoint: /centralbank/save créer le compte de la banque centrale dans le réseau. Il retourne: un objet {AccountId, password } si ajout reussit sinon null.")
     @PostMapping("/centralbank/save")
     public AccountIdAndPassword save(@RequestBody CentralBankAccountInfo centralBankAccountInfo) {
-      return centralBankInterface.save(centralBankAccountInfo);
+        return centralBankInterface.save(centralBankAccountInfo);
     }
 
     @ApiOperation(value = "Endpoint: /centralbank/saveotheraccount créer un autre compte de la banque centrale dans le réseau. Il retourne: un objet {AccountId, password } si ajout reussit sinon null.")
     @PostMapping("/centralbank/saveotheraccount")
-    public AccountIdAndPassword createOtherBankCount(@RequestBody NewCentralBankAccount newCentralBankAccount){
+    public AccountIdAndPassword createOtherBankCount(@RequestBody NewCentralBankAccount newCentralBankAccount) {
         return centralBankInterface.createOtherBankCount(newCentralBankAccount);
     }
 
@@ -60,7 +62,7 @@ public class CentralBankController {
     @PostMapping("/centralbank/update")
     public AccountIdAndPassword update(@RequestBody CentralBankUpdateModel centralBankUpdateModel) {
         return centralBankInterface.update(
-                centralBankUpdateModel.getBanqueCentrale(),centralBankUpdateModel.getCentralBankAccountId());
+                centralBankUpdateModel.getBanqueCentrale(), centralBankUpdateModel.getCentralBankAccountId());
     }
 
     @ApiOperation(value = "Endpoint: /centralbank/deleteOrActiveOrSwithAccountType desactif ou active ou change le type de compte le compte de la banque centrale dans le réseau. Il retourne un int: 1 desactivation reussie et 0 sinon . En cas desactivation reussie,un email est envoyer au responsable de la banque centrale.")
@@ -77,72 +79,101 @@ public class CentralBankController {
 
 
     @PostMapping("/politique/createmassemonnetaire")
-    public RegulateurMasseMonnetaire defineMasseMonnetaireRegulation(@RequestBody RegulateurMasseMonnetaire regulateurMasseMonnetaire){
+    public RegulateurMasseMonnetaire defineMasseMonnetaireRegulation(@RequestBody RegulateurMasseMonnetaire regulateurMasseMonnetaire) {
         return centralBankInterface.defineMasseMonnetaireRegulation(regulateurMasseMonnetaire);
     }
 
     @GetMapping("/politique/regulationmassemonnetaire/{pays}")
-    public RegulateurMasseMonnetaire getLastRegulationMasseMonnetaire(@PathVariable String pays){
+    public RegulateurMasseMonnetaire getLastRegulationMasseMonnetaire(@PathVariable String pays) {
         return centralBankInterface.getLastRegulationMasseMonnetaire(pays);
     }
 
     @PostMapping("/politique/createdeviseregulation")
-    public RegulateurDevise defineDeviseRegulation(@RequestBody RegulateurDevise regulateurDevise){
-        return  centralBankInterface.defineDeviseRegulation(regulateurDevise);
+    public RegulateurDevise defineDeviseRegulation(@RequestBody RegulateurDevise regulateurDevise) {
+        return centralBankInterface.defineDeviseRegulation(regulateurDevise);
     }
 
     @GetMapping("/politique/regulationdevise/{pays}")
-    public RegulateurDevise getLastRegulattionDevise(@PathVariable String pays){
+    public List<RegulateurDevise> getLastRegulattionDevise(@PathVariable String pays) {
         return centralBankInterface.getLastRegulattionDevise(pays);
     }
 
     @PostMapping("/politique/createtxregulationinterpays")
-    public RegulateurTransactionInterPays defineTransactionInterPaysRegulation(@RequestBody RegulateurTransactionInterPays regulateurTransactionInterPays){
+    public RegulateurTransactionInterPays defineTransactionInterPaysRegulation(@RequestBody RegulateurTransactionInterPays regulateurTransactionInterPays) {
         return centralBankInterface.defineTransactionInterPaysRegulation(regulateurTransactionInterPays);
     }
 
     @GetMapping("/politique/txregulationinterpays/{pays}")
-    public RegulateurTransactionInterPays getLastRegulationTransactionInterPays(@PathVariable String pays){
+    public RegulateurTransactionInterPays getLastRegulationTransactionInterPays(@PathVariable String pays) {
         return centralBankInterface.getLastRegulationTransactionInterPays(pays);
     }
 
     @PostMapping("/politique/createtxregulationlocal")
-    public RegulateurTransactionLocale defineTransactionLocaleRegulation(@RequestBody RegulateurTransactionLocale regulateurTransactionLocale){
+    public RegulateurTransactionLocale defineTransactionLocaleRegulation(@RequestBody RegulateurTransactionLocale regulateurTransactionLocale) {
         return centralBankInterface.defineTransactionLocaleRegulation(regulateurTransactionLocale);
     }
 
     @GetMapping("/politique/txregulationlocal/{pays}")
-    public RegulateurTransactionLocale getLastRegulationTransactionLocaleString(@PathVariable String pays){
+    public RegulateurTransactionLocale getLastRegulationTransactionLocaleString(@PathVariable String pays) {
         return centralBankInterface.getLastRegulationTransactionLocaleString(pays);
     }
 
     //Création CBDC
     @PostMapping("/createmoney")
-    public TransactionInterBanks createMoney(@RequestBody TransactionInterbancaire transactionInterBancaire){
+    public TransactionInterBanks createMoney(@RequestBody TransactionInterbancaire transactionInterBancaire) {
         return centralBankInterface.createMoney(transactionInterBancaire);
     }
 
     @PostMapping("/interbanktransaction")
-    public TransactionInterBanks  createTransaction(@RequestBody TransactionInterbancaire transactionInterbancaire){
+    public TransactionInterBanks createTransaction(@RequestBody TransactionInterbancaire transactionInterbancaire) {
         return centralBankInterface.createTransaction(transactionInterbancaire);
     }
 
     @GetMapping("/getCommercialBankByCountry/{pays}")
-    public List<CommercialBank> getCommercialBankByCountry(@PathVariable String pays){
+    public List<CommercialBank> getCommercialBankByCountry(@PathVariable String pays) {
         return centralBankInterface.getCommercialBankByCountry(pays);
     }
 
 
     @GetMapping("/getAllCommercialBanks")
-    public List<CommercialBank> getAllCommercialBanks(){
+    public List<CommercialBank> getAllCommercialBanks() {
         return centralBankInterface.getAllCommercialBanks();
     }
 
-    @GetMapping("/getCurrentBalance")
-        public Double getCurrentBalance(){
-            return centralBankInterface.getCurrentBalance();
-        }
+    @PostMapping("/CurrentBalance")
+    public Double getCurrentBalance(@RequestBody String sender) {
+        return centralBankInterface.getCurrentBalance(sender);
     }
+
+
+    @GetMapping("/getAllTxAmount/{sender}")
+    public List<Double> getAllAmountSentByCentralBank(@PathVariable String sender) {
+        return centralBankInterface.getAllAmountSentByCentralBank(sender);
+    }
+
+    @GetMapping("/getAllTxDates/{sender}")
+    public List<String> getAllDateByCentralBank(@PathVariable String sender) {
+        return centralBankInterface.getAllDateByCentralBank(sender);
+    }
+
+    @GetMapping("/getAllTxByCentralBank/{sender}")
+    public List<TransactionInterBanks> getAlltxByCentralBank(@PathVariable String sender) {
+        return centralBankInterface.getAlltxByCentralBank(sender);
+    }
+
+    @GetMapping("/getAllTx/{sender}")
+
+    public List<Double> getAllTx(@PathVariable String sender) {
+        return centralBankInterface.getAllTx(sender);
+    }
+
+
+    @PostMapping("/allUpdatesBalance")
+    public List<Double> getUpdatesBalance(@RequestBody String sender) {
+        return centralBankInterface.getUpdatesBalance(sender);
+    }
+}
+
 
 
 

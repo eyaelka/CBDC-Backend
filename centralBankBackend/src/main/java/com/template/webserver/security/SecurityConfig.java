@@ -30,6 +30,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
                 .antMatchers("/politique/createmassemonnetaire")
                 .antMatchers("/politique/createtxregulationlocal")
                 .antMatchers("/politique/createtxregulationinterpays")
+                .antMatchers("/interbanktransaction")
+                .antMatchers()
                 ;
     }
 
@@ -41,8 +43,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         //donner la permission à tous les utilisateurs de s'authentifier ou de s'enregistrer
-        http.authorizeRequests().antMatchers(HttpMethod.POST,"/login/**","/politique/regulationmassemonnetaire/**","/politique/createdeviseregulation/**","/createmoney","/interbanktransaction").permitAll();
-        http.authorizeRequests().antMatchers(HttpMethod.GET,"/getCurrentBalance","/getAllCommercialBanks","/getCommercialBankByCountry/**","/politique/regulationmassemonnetaire/**","/politique/regulationdevise/**","/politique/txregulationlocal/**","/politique/txregulationinterpays/**").permitAll();
+        http.authorizeRequests().antMatchers(HttpMethod.POST,"/allUpdatesBalance","/CurrentBalance","/login/**","/politique/regulationmassemonnetaire/**","/politique/createdeviseregulation/**","/createmoney","/interbanktransaction").permitAll();
+        http.authorizeRequests().antMatchers(HttpMethod.GET,"/getAllTx/**","/getAllTxByCentralBank/**","/getAllTxDates/**","/getAllTxAmount/**","/getCurrentBalance","/getAllCommercialBanks","/getCommercialBankByCountry/**","/politique/regulationmassemonnetaire/**","/politique/regulationdevise/**","/politique/txregulationlocal/**","/politique/txregulationinterpays/**").permitAll();
         //donner les permissions
         http.authorizeRequests().antMatchers(HttpMethod.POST,"/centralbank/save").hasAuthority("cbdcadmin");
         http.authorizeRequests().antMatchers(HttpMethod.POST,"/centralbank/saveotheraccount").hasAuthority("centralbank");

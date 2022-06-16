@@ -1,8 +1,6 @@
-package com.template.flows.politiquesMonetairesFlows;
+package com.template.flows.transactionsFlow;
 
-import com.template.model.politiquesMonetaires.RegulateurTransactionLocale;
 import com.template.model.transactions.TransactionInterBanks;
-import com.template.states.politiquesMonetairesStates.RegulateurTransactionLocaleStates;
 import com.template.states.transactionsStates.TransactionInterBanksStates;
 import net.corda.core.contracts.StateAndRef;
 import net.corda.core.flows.FlowException;
@@ -16,12 +14,13 @@ import java.util.List;
 
 @InitiatingFlow
 @StartableByRPC
-public class CurrentAmountCBDCReadFlowInitiator extends FlowLogic<Double> {
+public class AllSentRecievedBalanceFlowInitiator extends FlowLogic<List<Double>> {
 
 
     String sender;
 
-    public CurrentAmountCBDCReadFlowInitiator(String sender) {
+
+    public AllSentRecievedBalanceFlowInitiator(String sender) {
         this.sender = sender;
     }
 
@@ -29,7 +28,10 @@ public class CurrentAmountCBDCReadFlowInitiator extends FlowLogic<Double> {
     private final ProgressTracker progressTracker = new ProgressTracker();
 
     @Override
-    public Double call() throws FlowException {
+    public List<Double> call() throws FlowException {
+        double totalRecievedBalance = 0;
+        double totalSentBalance =0;
+
         List<StateAndRef<TransactionInterBanksStates>> stateAndRefList =
                 getServiceHub().getVaultService().queryBy(TransactionInterBanksStates.class).getStates();
 
@@ -38,19 +40,23 @@ public class CurrentAmountCBDCReadFlowInitiator extends FlowLogic<Double> {
         }
         for (int i = stateAndRefList.size() - 1; i >= 0; i--) {
             if (stateAndRefList.get(i) != null && stateAndRefList.get(i).getState() != null && stateAndRefList.get(i).getState().getData() != null && stateAndRefList.get(i).getState().getData().getTransactionInterBank() != null) {
-                TransactionInterBanks txInterbank = stateAndRefList.get(i).getState().getData().getTransactionInterBank();
+
                 if (stateAndRefList.get(i).getState().getData().getTransactionInterBank().getAccountSender().equals(sender) &&
                         stateAndRefList.get(i).getState().getData().getTransactionInterBank().getAccountReceiver().equals(sender)) {
-                    return stateAndRefList.get(i).getState().getData().getTransactionInterBank().getCurrentAmount();
+                    totalSentBalance += stateAndRefList.get(i).getState().getData().getTransactionInterBank().getAmountToTransfert();
                 }
-                if (!stateAndRefList.get(i).getState().getData().getTransactionInterBank().getAccountSender().equals(sender) &&
+                else if (!stateAndRefList.get(i).getState().getData().getTransactionInterBank().getAccountSender().equals(sender) &&
                         stateAndRefList.get(i).getState().getData().getTransactionInterBank().getAccountReceiver().equals(sender)) {
-                    return stateAndRefList.get(i).getState().getData().getTransactionInterBank().getCurrentAmount();
+                    totalRecievedBalance += stateAndRefList.get(i).getState().getData().getTransactionInterBank().getAmountToTransfert();
                 }
             }
         }
+        List<Double> balanceUpdates = new ArrayList<>();
 
-        return null;
+
+        balanceUpdates.add(new Double(totalSentBalance));
+        balanceUpdates.add(new Double(totalRecievedBalance));
+        return balanceUpdates;
 
     }
 

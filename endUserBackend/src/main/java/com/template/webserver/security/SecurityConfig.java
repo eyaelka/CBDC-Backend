@@ -28,7 +28,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
         web.ignoring()
                 .antMatchers("/enduser/sendcodeverification")
                 .antMatchers("/enduser/save")
-                .antMatchers("/enduser/notifyAdmin");
+                .antMatchers("/enduser/notifyAdmin")
+                .antMatchers("/enduser/deleteoractiveorswithacountytype")
+                .antMatchers("/enduser/update");
 
     }
     @Override
@@ -39,7 +41,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         //donner la permission à tous les utilisateurs de s'authentifier ou de s'enregistrer
-        http.authorizeRequests().antMatchers(HttpMethod.POST,"/login-2/**","/enduser/transaction").permitAll();
+        http.authorizeRequests().antMatchers(HttpMethod.POST,"/enduser/deleteoractiveorswithacountytype","/enduser/update","/login-2/**","/enduser/transaction").permitAll();
 
         //donner les permissions
         http.authorizeRequests().antMatchers(HttpMethod.POST,"/enduser/save").hasAuthority("user");

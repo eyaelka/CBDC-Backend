@@ -48,33 +48,5 @@ public class CentralBankReadFlowInitiator extends FlowLogic<CentralBankData> {
             }
         }
         return centralBankData;
-     /*   
-             
-
-        List<SignedTransaction> signedTransactions = getServiceHub().getValidatedTransactions().track().getSnapshot();
-
-        CentralBankData centralBankData = new CentralBankData();
-        for (SignedTransaction signedTransaction : signedTransactions) {
-            try {
-                if (signedTransaction.toLedgerTransaction(getServiceHub()).getOutput(0)
-                        instanceof CentralBankState) {
-                    CentralBankState centralBankState1 = (CentralBankState) signedTransaction.
-                            toLedgerTransaction(getServiceHub()).getOutput(0);
-                    if (centralBankState1.getCentralBank() != null && centralBankState1.getCentralBank().getCentralBankData() != null &&
-                            centralBankState1.getCentralBank().getCentralBankAccount() != null) {
-
-                        for (int j = 0; j < centralBankState1.getCentralBank().getCentralBankAccount().size(); j++) {
-                            if (centralBankState1.getCentralBank().getCentralBankAccount().get(j).getAccountId().equals(centralBankAccountId)) {
-                                centralBankData = centralBankState1.getCentralBank().getCentralBankData();
-                                break;
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        */
     }
 }

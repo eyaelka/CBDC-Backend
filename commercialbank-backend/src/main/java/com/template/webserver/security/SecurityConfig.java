@@ -28,7 +28,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
     public void configure(final WebSecurity web) throws Exception {
         web.ignoring()
                 .antMatchers("/commercialbank/create")
-                .antMatchers("/commercialbank/update");
+                .antMatchers("/commercialbank/update")
+                .antMatchers("/commercialbank/deleteoractiveorswithacountytype");
 
     }
 
@@ -40,12 +41,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         //donner la permission à tous les utilisateurs de s'authentifier ou de s'enregistrer
-        http.authorizeRequests().antMatchers("/login/**","/commercialbank/create","commercialbank/update","/interbanktransaction").permitAll();
+        http.authorizeRequests().antMatchers("/interbanktransaction","/getAllTxByCommercialBank/**","/getAllTx/**","/CurrentBalance","/allUpdatesBalance","/politique/regulationmassemonnetaire/**","/politique/txregulationlocal/**","/politique/txregulationinterpays/**","/politique/regulationdevise/**","/getAllUsers","/commercialbank/deleteoractiveorswithacountytype","/login/**","/commercialbank/create","commercialbank/update","/interbanktransaction").permitAll();
         //donner les permissions
         //http.authorizeRequests().antMatchers(HttpMethod.POST,"/commercialbank/create").hasAuthority("commercialbank");
         http.authorizeRequests().antMatchers(HttpMethod.POST,"/commercialbank/saveotheraccount").hasAuthority("commercialbank");
         http.authorizeRequests().antMatchers(HttpMethod.POST,"commercialbank/update").hasAuthority("commercialbank");
-        http.authorizeRequests().antMatchers(HttpMethod.POST, "/commercialbank/deleteOrActiveOrSwithAccountType").hasAuthority("commercialbank");
+//        http.authorizeRequests().antMatchers(HttpMethod.POST, /*"/commercialbank/deleteOrActiveOrSwithAccountType"*/).hasAuthority("commercialbank");
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(new CommercialBankAuthenticationFilter(authenticationManager()));
         http.addFilterBefore(new CommercialBankAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
