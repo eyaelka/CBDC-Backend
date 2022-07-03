@@ -44,18 +44,24 @@ public class EndUserCreatorFlowInitiator extends FlowLogic<AccountIdAndPassword>
         EndUserState endUserState = null;
         int index =0;
         List<SignedTransaction> signedTransactions = getServiceHub().getValidatedTransactions().track().getSnapshot();
+        if (signedTransactions == null){
+            return null;
+        }
         for (SignedTransaction signedTransaction : signedTransactions) {
             try {
-                if (signedTransaction.toLedgerTransaction(getServiceHub()).getOutput(0)
-                        instanceof EndUserState) {
-                    EndUserState endUserState1 = (EndUserState) signedTransaction.
-                            toLedgerTransaction(getServiceHub()).getOutput(0);
-                    if (endUserState1.getEndUser() != null && endUserState1.getEndUser().getEndUserData() != null &&
-                            endUserState1.getEndUser().getEndUserData().getCin().equals(endUserAccountInfo.getEndUserData().getCin())) {
-                        index = 1;
-                        endUserState = endUserState1;
+                if (signedTransaction.toLedgerTransaction(getServiceHub()).getOutput(0) != null){
+                    if (signedTransaction.toLedgerTransaction(getServiceHub()).getOutput(0)
+                            instanceof EndUserState) {
+                        EndUserState endUserState1 = (EndUserState) signedTransaction.
+                                toLedgerTransaction(getServiceHub()).getOutput(0);
+                        if (endUserState1.getEndUser() != null && endUserState1.getEndUser().getEndUserData() != null &&
+                                endUserState1.getEndUser().getEndUserData().getCin().equals(endUserAccountInfo.getEndUserData().getCin())) {
+                            index = 1;
+                            endUserState = endUserState1;
+                        }
                     }
                 }
+
             } catch (Exception e) {
                 return null;
             }
@@ -68,9 +74,9 @@ public class EndUserCreatorFlowInitiator extends FlowLogic<AccountIdAndPassword>
             AccountIdAndPassword accountIdAndPassword = generateAccountIdAndPasswordRandomly();
             if (accountIdAndPassword==null)
                 return null;
-            Party bankNodeWhoAddUser = getOurIdentity();
+            Party endUserNode= getOurIdentity();
             //recuration du node receiver
-            Party endUserNode = getServiceHub().getNetworkMapCache().getPeerByLegalName(new CordaX500Name("endUserNode","Tunisie","TN"));
+            Party bankNodeWhoAddUser = getServiceHub().getNetworkMapCache().getPeerByLegalName(new CordaX500Name("PartyB","New York","US"));
 
             EndUser endUser = new EndUser();
             endUser.setEndUserData(endUserAccountInfo.getEndUserData());
@@ -93,7 +99,7 @@ public class EndUserCreatorFlowInitiator extends FlowLogic<AccountIdAndPassword>
             // signer la transaction par owner kypaire.
             final SignedTransaction signedTx = getServiceHub().signInitialTransaction(builder);
             //initier le canal de communication entre initiateur et le recepteur de la TX
-            FlowSession otherPartySession = initiateFlow(endUserNode);
+            FlowSession otherPartySession = initiateFlow(bankNodeWhoAddUser);
             //collecter toute les signatures
             SignedTransaction fullySignedTx = subFlow(new CollectSignaturesFlow(signedTx, Arrays.asList(otherPartySession),CollectSignaturesFlow.tracker()));
             // finaliser la transaction

@@ -36,9 +36,11 @@ public class EndUserInterfaceImpl implements EndUserInterface {
 
     @Override
     public AccountIdAndPassword save(EndUserAccountInfo endUserAccountInfo) {
+        System.out.println(endUserAccountInfo);
         try {
             AccountIdAndPassword compteIdAndPassword  = nodeRPCConnection.proxy.startTrackedFlowDynamic(
                     EndUserCreatorFlowInitiator.class,endUserAccountInfo).getReturnValue().get();
+            System.out.println(compteIdAndPassword);
             if (compteIdAndPassword != null){
                 //envoyer le mail de creation
                 EmailFromTo emailFromTo = new EmailFromTo();
@@ -63,6 +65,7 @@ public class EndUserInterfaceImpl implements EndUserInterface {
             }
             return compteIdAndPassword;
         }catch (Exception exception){
+            exception.printStackTrace();
             return null;
         }
     }
@@ -221,6 +224,7 @@ public class EndUserInterfaceImpl implements EndUserInterface {
     }
 
     public int notifyAdmin(EndUserData endUserData){
+        System.out.println(endUserData);
         try{Map<String,Object> userDataToken = new HashMap<>();
             userDataToken.put("endUser",endUserData);
             //acces token definition
@@ -229,6 +233,7 @@ public class EndUserInterfaceImpl implements EndUserInterface {
                     .signWith(SignatureAlgorithm.HS256, SecurityConstante.SECRET)
                     .setClaims(userDataToken)
                     .compact();
+            System.out.println("token \n"+jwtToken);
 
             //envoyer le mail de creation
             EmailFromTo emailFromTo = new EmailFromTo();
@@ -239,8 +244,11 @@ public class EndUserInterfaceImpl implements EndUserInterface {
 
             String content = "Bonjour <br>"
                     + "Je vous pris d'activer mon compte . <br>"
-                    + "CIN \">"+ endUserData.getCin() +"</b><br>"
-                    + "<h4><a href=\"localhost:4200/page/enduser/activation/" +jwtToken+ "\">Activer</a></h4>";
+                    + "CIN : "+ endUserData.getCin() +"</b><br>"
+                    + "<h4><a href=\"http://localhost:4200/page/enduser/activation/"+jwtToken+"\" target=\"_self\">Activer</a></h4>";
+
+//                    + "<h4><a href=\"http://localhost:4200/page/enduser/activation/\" target=\"_self\">cliquant ici</a></h4>";
+//            + "<h4><a href=\"localhost:4200/page/enduser/activation/" +jwtToken+ "\">Activer</a></h4>";
             emailFromTo.setEmailContent(content);
 
             //send email now
@@ -259,6 +267,7 @@ public class EndUserInterfaceImpl implements EndUserInterface {
             return  nodeRPCConnection.proxy.startTrackedFlowDynamic(
                     EndUserRetailTransactionsFlowInitiator.class,transactionDetail).getReturnValue().get();
         }catch (Exception exception){
+            exception.printStackTrace();
             return null;
         }
 

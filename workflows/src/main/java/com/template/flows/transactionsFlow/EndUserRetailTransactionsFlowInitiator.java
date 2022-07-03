@@ -58,12 +58,14 @@ public class EndUserRetailTransactionsFlowInitiator extends FlowLogic<RetailTran
         }
         // lecture de l'émetteur à partir du ledger
         Object sender = CommonTreatment.getSenderObject(retailTransaction.getAccountSender(),password, getServiceHub());
+        System.out.println("sender \n"+sender);
         // si l'émetteur n'existe pas dans le ledger, annuller la transaction
         if (sender == null){
             return null;
         }
         // lecture du recepteur à partir du ledger
         Object receiverObjet = CommonTreatment.getReceiverObject(retailTransaction.getAccountReceiver(), getServiceHub());
+        System.out.println("receiverObjet \n"+receiverObjet);
         // si le recepteur n'existe pas dans le ledger, annuller la transaction.
         if (receiverObjet == null){
             return null;
@@ -123,12 +125,14 @@ public class EndUserRetailTransactionsFlowInitiator extends FlowLogic<RetailTran
 
         // Lecture du pays de l'émetteur de la TX. ce pays peut être différent à la nationnalité du client.
         String paysSender = CommonTreatment.getPaysSender(retailTransaction.getAccountSender(), password,getServiceHub());
+        System.out.println("paysSender \n"+paysSender);
         //Si le pays est introuvable, annuller la TX
         if(paysSender == null)
             return null;
 
         //lecture de la balance de l'émetteur
         senderBalanceOject = CommonTreatment.getBalanceObject(retailTransaction.getAccountSender(), paysSender,getServiceHub());
+        System.out.println("senderBalanceOject\n"+senderBalanceOject);
         // S'il n'ya pas de balance alors anuller la TX
         if (senderBalanceOject == null){
             return null;

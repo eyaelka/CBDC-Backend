@@ -1665,7 +1665,7 @@ public class CommonTreatment {
                             endUserAccount.getPassword().equals(password)) {
                         bankId = endUserAccount.getBankIndcation();
                         out=1;
-                        break;
+                        System.out.println("bankId\n"+bankId);
                     }
                 }
             }
@@ -1693,7 +1693,7 @@ public class CommonTreatment {
                     if (commercialBankAccount.getAccountId().equals(bankId)) {
                         pays = commercialBank.getCommercialBankData().getPays();
                         out=1;
-                        break;
+                        System.out.println("pays \n"+pays);
                     }
                 }
             }
